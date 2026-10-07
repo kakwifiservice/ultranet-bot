@@ -16,7 +16,8 @@ from telegram.ext import (
 # BOT TOKEN
 # =========================================================
 
-TOKEN = ""
+import os
+TOKEN = os.getenv("BOT_TOKEN", "").strip()
 
 BOT_NAME = "Ultra Net KAK WiFi Internet Service Provider"
 
@@ -2414,10 +2415,10 @@ Internet ပြဿနာဖြစ်ပါက
 
 def main():
 
-    if TOKEN == "YOUR_BOT_TOKEN_HERE":
-        raise ValueError(
-            "bot.py ထဲက YOUR_BOT_TOKEN_HERE နေရာမှာ "
-            "မိမိ BotFather Token ကို ထည့်ပါ။"
+    if not TOKEN:
+    raise ValueError(
+        "BOT_TOKEN environment variable မရှိသေးပါ။"
+    )
         )
 
     app = Application.builder().token(TOKEN).build()
