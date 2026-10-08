@@ -2415,8 +2415,9 @@ Internet ပြဿနာဖြစ်ပါက
 def main():
 
     if not TOKEN:
-    raise ValueError("BOT_TOKEN environment variable မရှိသေးပါ။")
-        
+        raise ValueError(
+            "BOT_TOKEN environment variable မရှိသေးပါ။"
+        )
 
     app = Application.builder().token(TOKEN).build()
 
