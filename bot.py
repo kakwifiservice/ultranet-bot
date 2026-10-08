@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import re
+import os
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -16,7 +16,6 @@ from telegram.ext import (
 # BOT TOKEN
 # =========================================================
 
-import os
 TOKEN = os.getenv("BOT_TOKEN", "").strip()
 
 BOT_NAME = "Ultra Net KAK WiFi Internet Service Provider"
@@ -2416,10 +2415,8 @@ Internet ပြဿနာဖြစ်ပါက
 def main():
 
     if not TOKEN:
-    raise ValueError(
-        "BOT_TOKEN environment variable မရှိသေးပါ။"
-    )
-        )
+    raise ValueError("BOT_TOKEN environment variable မရှိသေးပါ။")
+        
 
     app = Application.builder().token(TOKEN).build()
 
