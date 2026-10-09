@@ -22,6 +22,24 @@ TOKEN = os.getenv("BOT_TOKEN", "").strip()
 BOT_NAME = "Ultra Net KAK WiFi Internet Service Provider"
 
 
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "").strip()
+
+
+async def notify_admin(context, text):
+    if not ADMIN_CHAT_ID:
+        return
+
+    try:
+        await context.bot.send_message(
+            chat_id=int(ADMIN_CHAT_ID),
+            text=text,
+        )
+    except Exception as e:
+        print(f"Admin notification failed: {e}")
+
+
+
+
 # =========================================================
 # CUSTOMER SUPPORT
 # =========================================================
@@ -731,6 +749,9 @@ async def handle_installation_flow(
 
             summary = installation_summary(context)
 
+            await notify_admin( context, f"📝 လိုင်းသစ်တပ်ဆင်ရန် လျှောက်လွှာအသစ်\n\n{summary}" 
+            )
+            
             reset_flow(context)
 
             await send_reply(
