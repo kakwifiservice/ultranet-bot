@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
