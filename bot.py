@@ -1200,7 +1200,21 @@ Internet မရတာက—
 
     if flow == "los":
 
+       
         if "နီနေဆဲ" in text:
+
+            await notify_admin(
+                context,
+                f"""🚨 Internet Complaint — LOS မီးနီနေဆဲ
+
+👤 Customer: {update.effective_user.full_name}
+🆔 Telegram ID: {update.effective_user.id}
+📱 Username: @{update.effective_user.username or 'မရှိပါ'}
+
+🔴 ပြဿနာ: LOS မီး ဆက်နီနေဆဲ
+📞 Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးပေးပါ။
+"""
+            )
 
             reset_flow(context)
 
