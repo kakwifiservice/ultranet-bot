@@ -1455,11 +1455,12 @@ WiFi ကို—
             )
             return
 
+    
     if flow == "single_device_result":
 
-        reset_flow(context)
-
         if "ရပါ" in text and "မရ" not in text:
+
+            reset_flow(context)
 
             await send_reply(
                 message,
@@ -1476,6 +1477,22 @@ Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်�
             )
 
         else:
+
+            await notify_admin(
+                context,
+                f"""🚨 Internet Complaint — Device တစ်လုံးတည်း Internet မရ
+
+👤 Customer: {update.effective_user.full_name}
+🆔 Telegram ID: {update.effective_user.id}
+📱 Username: @{update.effective_user.username or 'မရှိပါ'}
+
+📱 ပြဿနာ: WiFi ပြန်ချိတ်ပြီးသော်လည်း Internet မရသေးပါ။
+📞 Customer ကို 09-777719577 မှတစ်ဆင့်
+ဆက်သွယ်စစ်ဆေးပေးပါ။
+"""
+            )
+
+            reset_flow(context)
 
             await send_reply(
                 message,
@@ -1494,6 +1511,7 @@ Internet မရသေးပါက Device ဘက်ကို
             )
 
         return
+
 
     if flow == "speed":
 
