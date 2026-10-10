@@ -1647,6 +1647,19 @@ Package / Price မှာ ပြန်ကြည့်နိုင်ပါတယ
             )
             return
 
+        await notify_admin(
+            context,
+            f"""🚨 Internet Complaint — Speed နှေးခြင်း
+
+👤 Customer: {update.effective_user.full_name}
+🆔 Telegram ID: {update.effective_user.id}
+📱 Username: @{update.effective_user.username or 'မရှိပါ'}
+
+📈 ပြဿနာ: Device အားလုံး Internet နှေးနေပါသည်။
+📸 Speed Test ရလဒ်ကို Support Team မှ စစ်ဆေးပေးပါ။
+"""
+        )
+        
         reset_flow(context)
 
         await send_reply(
