@@ -2488,6 +2488,45 @@ Internet ပြဿနာဖြစ်ပါက
 
 
 # =========================================================
+
+# =========================================================
+# CHANNEL POST WITH CUSTOMER SUPPORT BUTTON
+# =========================================================
+
+async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.effective_user is None:
+        return
+
+    if not ADMIN_CHAT_ID or str(update.effective_user.id) != ADMIN_CHAT_ID:
+        await update.effective_message.reply_text("ဒီလုပ်ဆောင်ချက်ကို Admin သာ အသုံးပြုနိုင်ပါတယ်။")
+        return
+
+    if not context.args:
+        await update.effective_message.reply_text(
+            "ကြော်ငြာစာသားကို ထည့်ပေးပါ။\nဥပမာ — /post မင်္ဂလာပါ။ Ultra Net KAK မှ ကြိုဆိုပါတယ်။"
+        )
+        return
+
+    post_text = " ".join(context.args)
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(
+            "🤖 Customer Support",
+            url="https://t.me/UltraNetKAKMM_bot"
+        )]
+    ])
+
+    await context.bot.send_message(
+        chat_id="@ultranetkak",
+        text=post_text,
+        reply_markup=keyboard
+    )
+
+    await update.effective_message.reply_text(
+        "✅ Channel မှာ ကြော်ငြာတင်ပြီးပါပြီ။"
+    )
+
 # RUN BOT
 # =========================================================
 
@@ -2506,6 +2545,14 @@ def main():
             start,
         )
     )
+    
+    app.add_handler(
+        CommandHandler(
+            "post",
+            post_to_channel,
+        )
+    )
+
 
     app.add_handler(
         MessageHandler(
