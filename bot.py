@@ -2013,6 +2013,9 @@ Internet Problem Menu မှ
 
 async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    if update.effective_user is None:
+        return
+
     message = update.effective_message
 
     if not message:
