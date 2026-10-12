@@ -2021,6 +2021,10 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not message:
         return
 
+    # Group ထဲမှာ Bot က Customer Support အဖြေ မပေးပါ
+    if update.effective_chat and update.effective_chat.type in ("group", "supergroup"):
+        return
+
     if not message.text:
         return
 
