@@ -2535,7 +2535,7 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
-                "🤖 Customer Support",
+                "💬 သိလိုသမျှ မေးရန်",
                 url="https://t.me/UltraNetKAKMM_bot"
             )
         ]
