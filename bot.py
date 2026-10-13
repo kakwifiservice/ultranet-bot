@@ -385,28 +385,45 @@ async def handle_customer_id_flow(
 
     customer_id = raw.upper().strip()
 
+    
     if re.fullmatch(r"KAKMWD-\d{7}", customer_id):
 
-        reset_flow(context)
+        pending = context.user_data.get("pending_complaint")
 
-        await send_reply(
-            message,
-            f"""✅ Customer ID Format မှန်ပါတယ်။
+        reset_flow(context)
+        context.user_data["customer_id"] = customer_id
+
+        if pending == "🔧 Internet လုံးဝမရ":
+            await start_internet_flow(message, update, context)
+        elif pending == "🔴 LOS မီးနီ":
+            await start_los_flow(message, update, context)
+        elif pending == "🐌 Internet နှေး":
+            await start_speed_flow(message, update, context)
+        elif pending == "🔌 Internet ခဏခဏပြတ်":
+            await start_disconnect_flow(message, update, context)
+        elif pending == "📶 WiFi ပြဿနာ":
+            await start_wifi_flow(message, update, context)
+        elif pending == "⚡ Router / ONU ပြဿနာ":
+            await start_router_flow(message, update, context)
+        elif pending == "📱 Device တစ်လုံးတည်း မရ":
+            await start_single_device_flow(message, update, context)
+        elif pending == "🌐 Website / App တစ်ခုတည်း မရ":
+            await start_app_flow(message, update, context)
+        else:
+            await send_reply(
+                message,
+                f"""✅ Customer ID Format မှန်ပါတယ်။
 
 🆔 Customer ID
 {customer_id}
 
 လက်ရှိအဆင့်မှာ ID Format ကိုသာ
-စစ်ဆေးပေးနိုင်ပါတယ်ခင်ဗျာ။
-
-နောက်ပိုင်းမှာ Customer ID နဲ့
-Customer Information ကိုပါ
-စစ်ဆေးနိုင်အောင် Database ချိတ်ဆက်ပေးနိုင်ပါတယ်။
-""",
-            update,
-            menu(),
-        )
+စစ်ဆေးပေးနိုင်ပါတယ်ခင်ဗျာ။""",
+                update,
+                menu(),
+            )
         return
+
 
     await send_reply(
         message,
@@ -2297,41 +2314,27 @@ Device + First Month ပါဝင်ပါသည်။
         )
         return
 
+    
     # =====================================================
     # COMPLAINT BUTTONS
     # =====================================================
 
-    if raw == "🔧 Internet လုံးဝမရ":
-        await start_internet_flow(message, update, context)
+    complaint_buttons = [
+        "🔧 Internet လုံးဝမရ",
+        "🔴 LOS မီးနီ",
+        "🐌 Internet နှေး",
+        "🔌 Internet ခဏခဏပြတ်",
+        "📶 WiFi ပြဿနာ",
+        "⚡ Router / ONU ပြဿနာ",
+        "📱 Device တစ်လုံးတည်း မရ",
+        "🌐 Website / App တစ်ခုတည်း မရ",
+    ]
+
+    if raw in complaint_buttons:
+        context.user_data["pending_complaint"] = raw
+        await start_customer_id_flow(message, update, context)
         return
 
-    if raw == "🔴 LOS မီးနီ":
-        await start_los_flow(message, update, context)
-        return
-
-    if raw == "🐌 Internet နှေး":
-        await start_speed_flow(message, update, context)
-        return
-
-    if raw == "🔌 Internet ခဏခဏပြတ်":
-        await start_disconnect_flow(message, update, context)
-        return
-
-    if raw == "📶 WiFi ပြဿနာ":
-        await start_wifi_flow(message, update, context)
-        return
-
-    if raw == "⚡ Router / ONU ပြဿနာ":
-        await start_router_flow(message, update, context)
-        return
-
-    if raw == "📱 Device တစ်လုံးတည်း မရ":
-        await start_single_device_flow(message, update, context)
-        return
-
-    if raw == "🌐 Website / App တစ်ခုတည်း မရ":
-        await start_app_flow(message, update, context)
-        return
 
     # =====================================================
     # CURRENT INTERNET FLOW
