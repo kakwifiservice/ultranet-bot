@@ -2512,7 +2512,7 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(
-            "🤖 Customer Support",
+            "💬 သိလိုသမျှ မေးရန်",
             url="https://t.me/UltraNetKAKMM_bot"
         )]
     ])
