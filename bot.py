@@ -382,65 +382,66 @@ async def handle_customer_id_flow(
     context,
     raw,
 ):
-
     customer_id = raw.upper().strip()
 
-    
     if re.fullmatch(r"KAKMWD-\d{7}", customer_id):
+        context.user_data["customer_id"] = customer_id
 
         pending = context.user_data.get("pending_complaint")
 
-        reset_flow(context)
-        context.user_data["customer_id"] = customer_id
+        # Complaint ရွေးထားမှ ဖုန်းနံပါတ်တောင်းမယ်
+        if pending:
+            context.user_data["flow"] = "complaint_phone"
 
-        if pending == "🔧 Internet လုံးဝမရ":
-            await start_internet_flow(message, update, context)
-        elif pending == "🔴 LOS မီးနီ":
-            await start_los_flow(message, update, context)
-        elif pending == "🐌 Internet နှေး":
-            await start_speed_flow(message, update, context)
-        elif pending == "🔌 Internet ခဏခဏပြတ်":
-            await start_disconnect_flow(message, update, context)
-        elif pending == "📶 WiFi ပြဿနာ":
-            await start_wifi_flow(message, update, context)
-        elif pending == "⚡ Router / ONU ပြဿနာ":
-            await start_router_flow(message, update, context)
-        elif pending == "📱 Device တစ်လုံးတည်း မရ":
-            await start_single_device_flow(message, update, context)
-        elif pending == "🌐 Website / App တစ်ခုတည်း မရ":
-            await start_app_flow(message, update, context)
-        else:
             await send_reply(
                 message,
-                f"""✅ Customer ID Format မှန်ပါတယ်။
+                f"""✅ Customer ID မှန်ကန်ပါတယ်။
 
-🆔 Customer ID
-{customer_id}
+🆔 Customer ID: {customer_id}
 
-လက်ရှိအဆင့်မှာ ID Format ကိုသာ
-စစ်ဆေးပေးနိုင်ပါတယ်ခင်ဗျာ။""",
+📞 ဆက်သွယ်ရန် ဖုန်းနံပါတ်လေး ပေးပါခင်ဗျာ။
+
+မြန်မာဖုန်းနံပါတ် 09 နဲ့ စပြီး
+နံပါတ် 9 မှ 11 လုံးအထိ ထည့်ပေးပါ။
+
+ဥပမာ — 09XXXXXXXXX""",
                 update,
-                menu(),
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
             )
-        return
+            return
 
+        # သီးခြား Customer ID စစ်ဆေးခြင်း
+        reset_flow(context)
+
+        await send_reply(
+            message,
+            f"""✅ Customer ID ပုံစံ မှန်ကန်ပါတယ်။
+
+🆔 Customer ID: {customer_id}
+
+📌 ဤ ID သည် ပုံစံမှန်ကန်ကြောင်းသာ
+စစ်ဆေးပေးထားခြင်း ဖြစ်ပါတယ်။
+
+စက်အချက်အလက်ကို အတည်ပြုလိုပါက
+Customer Support ကို ဆက်သွယ်ပေးပါခင်ဗျာ။""",
+            update,
+            menu(),
+        )
+        return
 
     await send_reply(
         message,
-        """❌ Customer ID Format မမှန်သေးပါဘူး။
+        """❌ Customer ID ပုံစံ မမှန်ပါ။
 
-မှန်ကန်တဲ့ပုံစံက —
+KAKMWD- နောက်မှာ ဂဏန်း 7 လုံး
+ပါရပါမယ်။
 
-KAKMWD- + ဂဏန်း 7 လုံး
+ဥပမာ — KAKMWD-1234567
 
-ဥပမာ —
-KAKMWD-1234567
-
-⚠️ ဥပမာ ID ကို မပို့ပါနဲ့။
-မိမိ၏ စက် ID အမှန်ကိုသာ ပို့ပေးပါ။
-
-ထပ်မံပို့ပေးပါခင်ဗျာ။
-""",
+မိမိ၏ Customer ID အမှန်ကို ပြန်ပို့ပေးပါ။""",
         update,
         ReplyKeyboardMarkup(
             [["🔙 Main Menu"]],
@@ -2090,7 +2091,6 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # =====================================================
 
     if context.user_data.get("flow") == "customer_id":
-
         await handle_customer_id_flow(
             message,
             update,
@@ -2098,6 +2098,55 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             raw,
         )
         return
+
+    # =====================================================
+    # COMPLAINT PHONE ACTIVE FLOW
+    # =====================================================
+
+    if context.user_data.get("flow") == "complaint_phone":
+        phone = raw.strip()
+
+        if re.fullmatch(r"09\d{7,9}", phone):
+            context.user_data["customer_phone"] = phone
+            pending = context.user_data.get("pending_complaint")
+
+            if pending == "🔧 Internet လုံးဝမရ":
+                await start_internet_flow(message, update, context)
+            elif pending == "🔴 LOS မီးနီ":
+                await start_los_flow(message, update, context)
+            elif pending == "🐌 Internet နှေး":
+                await start_speed_flow(message, update, context)
+            elif pending == "🔌 Internet ခဏခဏပြတ်":
+                await start_disconnect_flow(message, update, context)
+            elif pending == "📶 WiFi ပြဿနာ":
+                await start_wifi_flow(message, update, context)
+            elif pending == "⚡ Router / ONU ပြဿနာ":
+                await start_router_flow(message, update, context)
+            elif pending == "📱 Device တစ်လုံးတည်း မရ":
+                await start_single_device_flow(message, update, context)
+            elif pending == "🌐 Website / App တစ်ခုတည်း မရ":
+                await start_app_flow(message, update, context)
+            else:
+                reset_flow(context)
+                await send_reply(
+                    message,
+                    "ဖုန်းနံပါတ်ကို လက်ခံရရှိပါပြီ။ Main Menu ကနေ ပြန်ရွေးပေးပါခင်ဗျာ။",
+                    update,
+                    menu(),
+                )
+            return
+
+        await send_reply(
+            message,
+            "❌ ဖုန်းနံပါတ်ပုံစံ မမှန်ပါ။\n\n09 နဲ့စတဲ့ မြန်မာဖုန်းနံပါတ်ကို ပြန်ပို့ပေးပါ။\nဥပမာ — 09123456789",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
 
     # =====================================================
     # NEW INSTALLATION BUTTON
