@@ -1148,17 +1148,16 @@ ONU / Router မှာရှိတဲ့ မီးတွေကို
                 ),
             )
             return
-
         if ("နီ" in text and "မနီ" not in text) or "red" in text:
-    await start_los_flow(message, update, context)
-    return
+            await start_los_flow(message, update, context)
+            return
 
-if "မနီ" in text:
-    context.user_data["flow"] = "all_or_one"
+        if "မနီ" in text:
+            context.user_data["flow"] = "all_or_one"
 
-    await send_reply(
-        message,
-        """ဟုတ်ကဲ့ခင်ဗျာ။ 🙏
+            await send_reply(
+                message,
+                """ဟုတ်ကဲ့ခင်ဗျာ။ 🙏
 
 LOS မီးမနီပါက ဆက်စစ်ပေးပါမယ်။
 
@@ -1168,17 +1167,17 @@ Internet မရတာက—
 📱 Device တစ်လုံးတည်းမှာ မရပါ
 
 ဘယ်အခြေအနေပါလဲ?""",
-        update,
-        ReplyKeyboardMarkup(
-            [
-                ["📱 Device အားလုံး မရပါ"],
-                ["📱 Device တစ်လုံးတည်း မရပါ"],
-                ["🔙 Main Menu"],
-            ],
-            resize_keyboard=True,
-        ),
-    )
-    return
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["📱 Device အားလုံး မရပါ"],
+                        ["📱 Device တစ်လုံးတည်း မရပါ"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
 
     if flow == "unknown_los":
 
