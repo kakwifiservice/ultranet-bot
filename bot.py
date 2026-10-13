@@ -2508,7 +2508,9 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    post_text = " ".join(context.args)
+    
+post_text = update.effective_message.text.partition(" ")[2].strip()
+
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(
@@ -2517,15 +2519,18 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )]
     ])
 
+    
     await context.bot.send_message(
         chat_id="@ultranetkak",
-        text=post_text,
+        text=post_text.replace("**", "*"),
+        parse_mode="Markdown",
         reply_markup=keyboard
     )
 
     await update.effective_message.reply_text(
         "✅ Channel မှာ ကြော်ငြာတင်ပြီးပါပြီ။"
     )
+
 
 # =========================================================
 # CUSTOMER SUPPORT BUTTON FOR DISCUSSION GROUP
