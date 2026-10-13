@@ -2527,6 +2527,25 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "✅ Channel မှာ ကြော်ငြာတင်ပြီးပါပြီ။"
     )
 
+# =========================================================
+# CUSTOMER SUPPORT BUTTON FOR DISCUSSION GROUP
+# =========================================================
+
+async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "🤖 Customer Support",
+                url="https://t.me/UltraNetKAKMM_bot"
+            )
+        ]
+    ])
+
+    await update.effective_message.reply_text(
+        "မင်္ဂလာပါ။ Ultra Net KAK Customer Support ကို ဆက်သွယ်ရန် အောက်က Button ကို နှိပ်ပါ။",
+        reply_markup=keyboard
+    )
+
 # RUN BOT
 # =========================================================
 
@@ -2545,7 +2564,7 @@ def main():
             start,
         )
     )
-    
+
     app.add_handler(
         CommandHandler(
             "post",
@@ -2553,6 +2572,12 @@ def main():
         )
     )
 
+    app.add_handler(
+        CommandHandler(
+            "support",
+            support_command,
+        )
+    )
 
     app.add_handler(
         MessageHandler(
