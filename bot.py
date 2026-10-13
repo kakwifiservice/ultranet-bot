@@ -1149,36 +1149,40 @@ ONU / Router မှာရှိတဲ့ မီးတွေကို
             )
             return
 
-        if "နီ" in text or "red" in text:
-            await start_los_flow(message, update, context)
-            return
+        if ("နီ" in text and "မနီ" not in text) or "red" in text:
+    await start_los_flow(message, update, context)
+    return
 
-        context.user_data["flow"] = "all_or_one"
+if "မနီ" in text:
+    context.user_data["flow"] = "all_or_one"
 
-        await send_reply(
-            message,
-            """ဟုတ်ကဲ့ခင်ဗျာ။ 🙏
+    await send_reply(
+        message,
+        """ဟုတ်ကဲ့ခင်ဗျာ။ 🙏
 
-အခု Internet မရတာက—
+LOS မီးမနီပါက ဆက်စစ်ပေးပါမယ်။
 
-📱 Device အားလုံးမှာ မရတာလား?
-📱 Device တစ်လုံးတည်းမှာ မရတာလား?
-""",
-            update,
-            ReplyKeyboardMarkup(
-                [
-                    ["📱 Device အားလုံး မရပါ"],
-                    ["📱 Device တစ်လုံးတည်း မရပါ"],
-                    ["🔙 Main Menu"],
-                ],
-                resize_keyboard=True,
-            ),
-        )
-        return
+Internet မရတာက—
+
+📱 Device အားလုံးမှာ မရပါ
+📱 Device တစ်လုံးတည်းမှာ မရပါ
+
+ဘယ်အခြေအနေပါလဲ?""",
+        update,
+        ReplyKeyboardMarkup(
+            [
+                ["📱 Device အားလုံး မရပါ"],
+                ["📱 Device တစ်လုံးတည်း မရပါ"],
+                ["🔙 Main Menu"],
+            ],
+            resize_keyboard=True,
+        ),
+    )
+    return
 
     if flow == "unknown_los":
 
-        if "နီ" in text:
+        if "နီ" in text and "မနီ" not in text:
             await start_los_flow(message, update, context)
             return
 
