@@ -2493,13 +2493,15 @@ Internet ပြဿနာဖြစ်ပါက
 # CHANNEL POST WITH CUSTOMER SUPPORT BUTTON
 # =========================================================
 
-async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user is None:
         return
 
     if not ADMIN_CHAT_ID or str(update.effective_user.id) != ADMIN_CHAT_ID:
-        await update.effective_message.reply_text("ဒီလုပ်ဆောင်ချက်ကို Admin သာ အသုံးပြုနိုင်ပါတယ်။")
+        await update.effective_message.reply_text(
+            "ဒီလုပ်ဆောင်ချက်ကို Admin သာ အသုံးပြုနိုင်ပါတယ်။"
+        )
         return
 
     if not context.args:
@@ -2508,9 +2510,7 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    
-post_text = update.effective_message.text.partition(" ")[2].strip()
-
+    post_text = update.effective_message.text.partition(" ")[2].strip()
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(
@@ -2519,7 +2519,6 @@ post_text = update.effective_message.text.partition(" ")[2].strip()
         )]
     ])
 
-    
     await context.bot.send_message(
         chat_id="@ultranetkak",
         text=post_text.replace("**", "*"),
@@ -2530,7 +2529,6 @@ post_text = update.effective_message.text.partition(" ")[2].strip()
     await update.effective_message.reply_text(
         "✅ Channel မှာ ကြော်ငြာတင်ပြီးပါပြီ။"
     )
-
 
 # =========================================================
 # CUSTOMER SUPPORT BUTTON FOR DISCUSSION GROUP
