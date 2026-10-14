@@ -1230,6 +1230,7 @@ Internet မရတာက—
     if flow == "los":
 
        
+    
         if "နီနေဆဲ" in text:
 
             await notify_admin(
@@ -1237,6 +1238,8 @@ Internet မရတာက—
                 f"""🚨 Internet Complaint — LOS မီးနီနေဆဲ
 
 👤 Customer: {update.effective_user.full_name}
+🆔 Customer ID: {context.user_data.get('customer_id', 'မရှိပါ')}
+📞 Customer Phone: {context.user_data.get('customer_phone', 'မရှိပါ')}
 🆔 Telegram ID: {update.effective_user.id}
 📱 Username: @{update.effective_user.username or 'မရှိပါ'}
 
