@@ -2084,6 +2084,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     
+    
     # =====================================================
     # WIFI PASSWORD CHANGE FLOW
     # =====================================================
@@ -2093,7 +2094,9 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await send_reply(
             message,
-            "🔐 WiFi Password ပြောင်းရန်\n\n🆔 Customer ID ကို ပို့ပေးပါခင်ဗျာ။\n\nဥပမာ - KAKMWD-1234567",
+            "🔐 WiFi Password ပြောင်းရန်\n\n"
+            "🆔 Customer ID ကို ပို့ပေးပါခင်ဗျာ။\n\n"
+            "ဥပမာ - KAKMWD-1234567",
             update,
             ReplyKeyboardMarkup(
                 [["🔙 Main Menu"]],
@@ -2112,7 +2115,8 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ):
             await send_reply(
                 message,
-                "❌ Customer ID ပုံစံ မမှန်ပါခင်ဗျာ။\nKAKMWD- နောက်မှာ ဂဏန်း ၇ လုံး ပါရပါမယ်။",
+                "❌ Customer ID ပုံစံ မမှန်ပါခင်ဗျာ။\n"
+                "KAKMWD- နောက်မှာ ဂဏန်း ၇ လုံး ပါရပါမယ်။",
                 update,
                 ReplyKeyboardMarkup(
                     [["🔙 Main Menu"]],
@@ -2145,7 +2149,8 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ):
             await send_reply(
                 message,
-                "❌ ဖုန်းနံပါတ် ပုံစံမမှန်ပါခင်ဗျာ။\n09 နဲ့ စတဲ့ ဖုန်းနံပါတ်ကို ပြန်ပို့ပေးပါ။",
+                "❌ ဖုန်းနံပါတ် ပုံစံမမှန်ပါခင်ဗျာ။\n"
+                "09 နဲ့ စတဲ့ ဖုန်းနံပါတ်ကို ပြန်ပို့ပေးပါ။",
                 update,
                 ReplyKeyboardMarkup(
                     [["🔙 Main Menu"]],
@@ -2155,19 +2160,98 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         context.user_data["customer_phone"] = phone
+        context.user_data["flow"] = "password_change_type"
+
+        await send_reply(
+            message,
+            "🔐 ဘယ်လို Password မျိုး ပြောင်းချင်ပါသလဲခင်ဗျာ?",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["🔐 ပုံမှန် WiFi Password (အနည်းဆုံး 8 လုံး)"],
+                    ["📷 QR Code အတွက် (အနည်းဆုံး 13 လုံး)"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    if context.user_data.get("flow") == "password_change_type":
+        if raw == "🔐 ပုံမှန် WiFi Password (အနည်းဆုံး 8 လုံး)":
+            context.user_data["password_min_length"] = 8
+            context.user_data["password_type"] = "ပုံမှန် WiFi Password"
+
+        elif raw == "📷 QR Code အတွက် (အနည်းဆုံး 13 လုံး)":
+            context.user_data["password_min_length"] = 13
+            context.user_data["password_type"] = "QR Code အတွက် WiFi Password"
+
+        else:
+            await send_reply(
+                message,
+                "အပေါ်က Password အမျိုးအစား ၂ မျိုးထဲမှ တစ်ခုကို ရွေးပေးပါခင်ဗျာ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["🔐 ပုံမှန် WiFi Password (အနည်းဆုံး 8 လုံး)"],
+                        ["📷 QR Code အတွက် (အနည်းဆုံး 13 လုံး)"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["flow"] = "password_change_new_password"
+
+        await send_reply(
+            message,
+            f"🔑 ပြောင်းချင်တဲ့ WiFi Password အသစ်ကို ရေးထည့်ပေးပါခင်ဗျာ။\n\n"
+            f"အနည်းဆုံး {context.user_data['password_min_length']} လုံး ရှိရပါမယ်။",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    if context.user_data.get("flow") == "password_change_new_password":
+        new_password = raw.strip()
+        min_length = context.user_data.get("password_min_length", 8)
+
+        if len(new_password) < min_length:
+            await send_reply(
+                message,
+                f"❌ Password အရှည် မလုံလောက်ပါခင်ဗျာ။\n"
+                f"အနည်းဆုံး {min_length} လုံး ရှိရပါမယ်။\n"
+                "Password အသစ်ကို ပြန်ရေးထည့်ပေးပါ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        customer_id = context.user_data.get("customer_id", "မရှိပါ")
+        phone = context.user_data.get("customer_phone", "မရှိပါ")
+        password_type = context.user_data.get("password_type", "WiFi Password")
 
         await notify_admin(
             context,
             f"""🔐 WiFi Password ပြောင်းရန် တောင်းဆိုမှု
 
 👤 Customer: {update.effective_user.full_name}
-🆔 Customer ID: {context.user_data.get('customer_id', 'မရှိပါ')}
-📞 Customer Phone: {context.user_data.get('customer_phone', 'မရှိပါ')}
+🆔 Customer ID: {customer_id}
+📞 ဖုန်းနံပါတ်: {phone}
 🆔 Telegram ID: {update.effective_user.id}
 📱 Username: @{update.effective_user.username or 'မရှိပါ'}
 
-📌 တောင်းဆိုချက်: WiFi Password ပြောင်းလဲပေးရန်
-📞 Customer ထံ ဆက်သွယ်ပြီး ဆောင်ရွက်ပေးပါ။
+📌 Password အမျိုးအစား: {password_type}
+🔑 Password အသစ်: {new_password}
+
+⚠️ Customer ကို ဆက်သွယ်ပြီး တောင်းဆိုချက်ကို ဆောင်ရွက်ပေးပါ။
 """
         )
 
@@ -2184,6 +2268,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             menu(),
         )
         return
+
 
     # =====================================================
     # CUSTOMER ID BUTTON
