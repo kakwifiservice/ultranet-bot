@@ -42,8 +42,31 @@ async def notify_admin(context, text):
     except Exception as e:
         print(f"Admin notification failed: {e}")
 
+async def send_complaint_report(update, context, problem, result):
+    user = update.effective_user
 
+    customer_id = context.user_data.get(
+        "customer_id", "မရှိပါ"
+    )
+    customer_phone = context.user_data.get(
+        "customer_phone", "မရှိပါ"
+    )
 
+    report = f"""🚨 Ultra Net KAK — Internet Complaint
+
+👤 Customer: {user.full_name}
+🆔 Customer ID: {customer_id}
+📞 ဖုန်းနံပါတ်: {customer_phone}
+🆔 Telegram ID: {user.id}
+📱 Username: @{user.username or 'မရှိပါ'}
+
+🔧 Complaint: {problem}
+📋 စစ်ဆေးပြီးရလဒ်: {result}
+
+📞 Support Team မှ ဆက်သွယ်စစ်ဆေးပေးပါ။
+"""
+
+    await notify_admin(context, report)
 
 # =========================================================
 # CUSTOMER SUPPORT
