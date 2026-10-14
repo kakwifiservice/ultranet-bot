@@ -1252,25 +1252,15 @@ Internet မရတာက—
             await start_router_flow(message, update, context)
             return
 
-    if flow == "los":
-
-       
     
+    
+    if flow == "los":
         if "နီနေဆဲ" in text:
-
-            await notify_admin(
+            await send_complaint_report(
+                update,
                 context,
-                f"""🚨 Internet Complaint — LOS မီးနီနေဆဲ
-
-👤 Customer: {update.effective_user.full_name}
-🆔 Customer ID: {context.user_data.get('customer_id', 'မရှိပါ')}
-📞 Customer Phone: {context.user_data.get('customer_phone', 'မရှိပါ')}
-🆔 Telegram ID: {update.effective_user.id}
-📱 Username: @{update.effective_user.username or 'မရှိပါ'}
-
-🔴 ပြဿနာ: LOS မီး ဆက်နီနေဆဲ
-📞 Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးပေးပါ။
-"""
+                "LOS မီးနီနေဆဲ",
+                "Fiber Signal ပြဿနာ ဖြစ်နိုင်သည်။ Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
             )
 
             reset_flow(context)
@@ -1294,6 +1284,7 @@ Support Team မှ စစ်ဆေးပေးရန်
             return
 
         if "ပျောက်" in text:
+
 
             context.user_data["flow"] = "los_recovered"
 
