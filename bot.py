@@ -204,6 +204,7 @@ def menu():
 # COMPLAINT MENU
 # =========================================================
 
+
 def complaint_menu():
     return ReplyKeyboardMarkup(
         [
@@ -215,6 +216,7 @@ def complaint_menu():
             ["⚡ Router / ONU ပြဿနာ"],
             ["📱 Device တစ်လုံးတည်း မရ"],
             ["🌐 Website / App တစ်ခုတည်း မရ"],
+            ["🔐 WiFi Password ပြောင်းရန်"],
             ["🔙 Main Menu"],
         ],
         resize_keyboard=True,
@@ -2077,6 +2079,107 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 ဘာကိစ္စအတွက် ကူညီပေးရမလဲခင်ဗျာ? 🙏
 """,
+            update,
+            menu(),
+        )
+        return
+    
+    # =====================================================
+    # WIFI PASSWORD CHANGE FLOW
+    # =====================================================
+
+    if raw == "🔐 WiFi Password ပြောင်းရန်":
+        context.user_data["flow"] = "password_change_customer_id"
+
+        await send_reply(
+            message,
+            "🔐 WiFi Password ပြောင်းရန်\n\n🆔 Customer ID ကို ပို့ပေးပါခင်ဗျာ။\n\nဥပမာ - KAKMWD-1234567",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    if context.user_data.get("flow") == "password_change_customer_id":
+        customer_id = raw.strip().upper()
+
+        if not (
+            customer_id.startswith("KAKMWD-")
+            and len(customer_id[7:]) == 7
+            and customer_id[7:].isdigit()
+        ):
+            await send_reply(
+                message,
+                "❌ Customer ID ပုံစံ မမှန်ပါခင်ဗျာ။\nKAKMWD- နောက်မှာ ဂဏန်း ၇ လုံး ပါရပါမယ်။",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["customer_id"] = customer_id
+        context.user_data["flow"] = "password_change_phone"
+
+        await send_reply(
+            message,
+            "📞 ဆက်သွယ်ရမည့် ဖုန်းနံပါတ်ကို ပို့ပေးပါခင်ဗျာ။",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    if context.user_data.get("flow") == "password_change_phone":
+        phone = raw.strip()
+
+        if not (
+            phone.startswith("09")
+            and phone[2:].isdigit()
+            and 9 <= len(phone) <= 11
+        ):
+            await send_reply(
+                message,
+                "❌ ဖုန်းနံပါတ် ပုံစံမမှန်ပါခင်ဗျာ။\n09 နဲ့ စတဲ့ ဖုန်းနံပါတ်ကို ပြန်ပို့ပေးပါ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["customer_phone"] = phone
+
+        await notify_admin(
+            context,
+            f"""🔐 WiFi Password ပြောင်းရန် တောင်းဆိုမှု
+
+👤 Customer: {update.effective_user.full_name}
+🆔 Customer ID: {context.user_data.get('customer_id', 'မရှိပါ')}
+📞 Customer Phone: {context.user_data.get('customer_phone', 'မရှိပါ')}
+🆔 Telegram ID: {update.effective_user.id}
+📱 Username: @{update.effective_user.username or 'မရှိပါ'}
+
+📌 တောင်းဆိုချက်: WiFi Password ပြောင်းလဲပေးရန်
+📞 Customer ထံ ဆက်သွယ်ပြီး ဆောင်ရွက်ပေးပါ။
+"""
+        )
+
+        reset_flow(context)
+
+        await send_reply(
+            message,
+            """✅ Password ပြောင်းလဲရန် တောင်းဆိုမှုကို လက်ခံရရှိပါပြီခင်ဗျာ။
+
+ဝန်ဆောင်မှုအဖွဲ့မှ Password ပြောင်းလဲပေးပြီးပါက လူကြီးမင်းထံ ပြန်လည်ဆက်သွယ်ပေးပါမယ်။
+
+ကျေးဇူးတင်ပါတယ်။ 🙏""",
             update,
             menu(),
         )
