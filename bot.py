@@ -1,4 +1,99 @@
 # -*- coding: utf-8 -*-
+"""Ultra Net KAK customer-support Telegram bot.
+Python 3.14; python-telegram-bot 22.x
+Set BOT_TOKEN and ADMIN_CHAT_ID as environment variables. Never paste the token into chat.
+"""
+import os
+import re
+import logging
+from telegram import (
+    Update, ReplyKeyboardMarkup, KeyboardButton,
+    InlineKeyboardMarkup, InlineKeyboardButton,
+)
+from telegram.ext import (
+    Application, CommandHandler, MessageHandler, ContextTypes, filters,
+)
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    level=logging.INFO,
+)
+log = logging.getLogger("ultranet")
+
+BOT_NAME = "Ultra Net KAK WiFi Internet Service Provider"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "").strip()
+BOT_USERNAME = "UltraNetKAKMM_bot"
+CHANNEL_URL = "https://t.me/ultranetkak"
+GROUP_URL = "https://t.me/+30B6ITGkrfg5YTA1"
+SUPPORT_PHONE = "09-777719577"
+SUPPORT_TELEGRAM = "@UltraNetKAKWiFi"
+PAYMENT_VIBER = "09-796000066"
+OFFICE_ADDRESS = "ဓိဌာန်အောင် ဘုရားလမ်း၊ အမှတ်(၄)ရပ်ကွက်၊ မြဝတီမြို့"
+SUPPORT_HOURS = "နေ့စဉ် နံနက် ၉:၀၀ မှ နေ့လယ် ၁၂:၀၀ အထိ"
+
+PACKAGES = {
+    "15": {"speed": "15 Mbps", "monthly": 40000, "total": 190000, "kind": "အိမ်သုံး"},
+    "25": {"speed": "25 Mbps", "monthly": 50000, "total": 200000, "kind": "အိမ်သုံး"},
+    "35": {"speed": "35 Mbps", "monthly": 80000, "total": 230000, "kind": "အိမ်သုံး"},
+    "50": {"speed": "50 Mbps", "monthly": 150000, "total": 300000, "kind": "လုပ်ငန်းသုံး"},
+    "70": {"speed": "70 Mbps", "monthly": 250000, "total": 400000, "kind": "လုပ်ငန်းသုံး"},
+}
+DEVICE_FEE = 150000
+CABLE_INFO = "ကြိုးခ: ရုံး/အထိုင်ပုံးမှ အိမ်အထိ ၂၅၀ မီတာအတွင်း အခမဲ့။ ၂၅၀ မီတာကျော်လျှင် ပိုသည့် ၁ မီတာလျှင် ၁,၀၀၀ ကျပ်။ ဥပမာ ၂၈၀ မီတာဆို ၃၀,၀၀၀ ကျပ် ထပ်ကျမည်။ မိမိဘာသာ မတိုင်းပါနှင့်၊ ဝန်ထမ်းက Survey လုပ်ချိန် တိုင်းပေးပါမည်။"
+
+MAIN_MENU = [
+    ["📦 Package / Price", "🌐 Internet Problem"],
+    ["💳 Payment", "🆔 Customer ID စစ်မယ်"],
+    ["📝 လိုင်းသစ်တပ်မယ်", "🔐 WiFi Password ပြောင်းမယ်"],
+    ["☎️ Customer Support", "📍 Location"],
+    ["🔗 Social Media", "ℹ️ ဝန်ဆောင်မှုအကြောင်း"],
+]
+MENU_MARKUP = ReplyKeyboardMarkup(MAIN_MENU, resize_keyboard=True)
+YES_NO = ReplyKeyboardMarkup([["ဟုတ်ပါတယ်", "မဟုတ်ပါဘူး"], ["မသေချာပါဘူး", "မီနူးသို့ပြန်မယ်"]], resize_keyboard=True)
+
+# Only these keys describe temporary conversations. Customer identity remains available
+# until the user explicitly restarts or changes it.
+TRANSIENT_KEYS = (
+    "flow", "pending_complaint", "complaint_type", "complaint_step",
+    "install", "install_step", "password_request", "password_step",
+    "last_speed", "last_issue",
+)
+
+def reset_flow(context: ContextTypes.DEFAULT_TYPE, clear_identity: bool = False) -> None:
+    for key in TRANSIENT_KEYS:
+        context.user_data.pop(key, None)
+    if clear_identity:
+        context.user_data.pop("customer_id", None)
+        context.user_data.pop("customer_phone", None)
+
+
+def normalize(value: str) -> str:
+    return re.sub(r"\s+", " ", (value or "").strip().lower())
+
+
+def money(value: int) -> str:
+    return f"{value:,} ကျပ်"
+
+async def safe_reply(update: Update, text: str, reply_markup=None) -> None:
+    if update.effective_message:
+        await update.effective_message.reply_text(text, reply_markup=reply_markup)
+
+async def notify_admin(context: ContextTypes.DEFAULT_TYPE, message: str) -> bool:
+    if not ADMIN_CHAT_ID:
+        log.error("ADMIN_CHAT_ID is not configured; admin notification not sent")
+        return False
+    try:
+        await context.bot.send_message(chat_id=int(ADMIN_CHAT_ID), text=message)
+        return True
+    except (ValueError, Exception):
+        log.exception("Could not send admin notification")
+        return False
+
+def user_details(update: Update) -> str:
+    user = update.effective_user
+    chat = update.effective_chat
+    if not user:# -*- coding: utf-8 -*-
 
 import os
 import re
@@ -1252,8 +1347,6 @@ Internet မရတာက—
             await start_router_flow(message, update, context)
             return
 
-    
-    
     if flow == "los":
         if "နီနေဆဲ" in text:
             await send_complaint_report(
@@ -1284,8 +1377,6 @@ Support Team မှ စစ်ဆေးပေးရန်
             return
 
         if "ပျောက်" in text:
-
-
             context.user_data["flow"] = "los_recovered"
 
             await send_reply(
@@ -1303,6 +1394,7 @@ Support Team မှ စစ်ဆေးပေးရန်
             return
 
         if "မသိ" in text:
+            reset_flow(context)
 
             await send_reply(
                 message,
@@ -1325,18 +1417,23 @@ LOS မီးက ONU / Router ပေါ်မှာ
 
     if flow == "los_recovered":
 
-        reset_flow(context)
-
         if "မရ" in text:
+            await send_complaint_report(
+                update,
+                context,
+                "LOS မီးပြန်ပျောက်သော်လည်း Internet မရခြင်း",
+                "LOS မီးပြန်ပျောက်သွားသော်လည်း Internet မရသေးပါ။"
+            )
+
+            reset_flow(context)
 
             await send_reply(
                 message,
                 """နားလည်ပါတယ်ခင်ဗျာ။ 🙏
 
 LOS မီးပြန်ပျောက်သွားပေမယ့်
-Internet မရသေးပါက
-Router / ONU ဘက်ကို ဆက်စစ်ဆေးရန်
-လိုအပ်နိုင်ပါတယ်။
+Internet မရသေးတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 📞 Customer Support
 09-777719577
@@ -1346,6 +1443,7 @@ Router / ONU ဘက်ကို ဆက်စစ်ဆေးရန်
             )
 
         else:
+            reset_flow(context)
 
             await send_reply(
                 message,
@@ -1364,6 +1462,8 @@ Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်�
     if flow == "router":
 
         if "မသိ" in text:
+
+            reset_flow(context)
 
             await send_reply(
                 message,
@@ -1386,28 +1486,29 @@ Router / ONU ရဲ့ Power မီးက
 
         if "မလင်း" in text or "မရှိ" in text:
 
-            reset_flow(context)
+            context.user_data["flow"] = "router_power_check"
 
             await send_reply(
                 message,
-                """🔌 Power မီးမလင်းပါက—
+                """🔌 Router / ONU ရဲ့ Power မီး မလင်းပါက—
 
-1️⃣ Power Adapter ချိတ်ထားမှု စစ်ပါ။
+1️⃣ Power Adapter ကို သေချာချိတ်ထားပါ။
 2️⃣ မီးပလပ် / Socket အလုပ်လုပ်/မလုပ် စစ်ပါ။
 3️⃣ Adapter ကို သေချာပြန်ချိတ်ပါ။
 
-⚠️ Router / ONU ရဲ့ RESET ခလုတ်ကို
-မနှိပ်ပါနဲ့။
+⚠️ RESET ခလုတ်ကို မနှိပ်ပါနဲ့။
 
-မီးမလင်းသေးပါက—
-
-📞 Customer Support
-09-777719577
-
-သို့ ဆက်သွယ်ပေးပါခင်ဗျာ။
+အခု Power မီး ပြန်လင်းလာပါပြီလား?
 """,
                 update,
-                menu(),
+                ReplyKeyboardMarkup(
+                    [
+                        ["🟢 ပြန်လင်းလာပါပြီ"],
+                        ["🔴 မလင်းသေးပါဘူး"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
             )
             return
 
@@ -1419,21 +1520,60 @@ Router / ONU ရဲ့ Power မီးက
 PON / LOS မီးကို ဆက်စစ်ပေးပါမယ်။
 
 🔴 LOS နီနေပါသလား?
-
-🔴 နီနေပါတယ်
-🟢 မနီပါဘူး
-❓ မသိပါဘူး
 """,
             update,
             yes_no_menu(),
         )
         return
 
-    if flow == "router_lights":
 
-        if "နီ" in text:
-            await start_los_flow(message, update, context)
+    if flow == "router_power_check":
+
+        if "ပြန်လင်း" in text and "မလင်း" not in text:
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🟢 Power မီး ပြန်လင်းလာပါပြီခင်ဗျာ။ 🙏
+
+အခု PON / LOS မီးအခြေအနေကို
+ဆက်စစ်ကြည့်ပေးပါ။
+
+ပြဿနာရှိနေသေးပါက
+Internet Problem Menu မှ ပြန်ရွေးနိုင်ပါတယ်။
+""",
+                update,
+                complaint_menu(),
+            )
             return
+
+        await send_complaint_report(
+            update,
+            context,
+            "Router / ONU Power မီးမလင်းခြင်း",
+            "Power Adapter၊ Power Socket နှင့် ချိတ်ဆက်မှုကို စစ်ဆေးပြီးနောက် Power မီး မလင်းသေးပါ။"
+        )
+
+        reset_flow(context)
+
+        await send_reply(
+            message,
+            """🔴 Power မီး မလင်းသေးတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+
+⚠️ RESET ခလုတ်ကို မနှိပ်ပါနဲ့။
+
+📞 Customer Support
+09-777719577
+သို့ ဆက်သွယ်ပေးပါခင်ဗျာ။
+""",
+            update,
+            menu(),
+        )
+        return
+
+    if flow == "router_lights":
 
         if "မနီ" in text:
 
@@ -1455,6 +1595,11 @@ PON / LOS မီးကို ဆက်စစ်ပေးပါမယ်။
             )
             return
 
+        if "နီ" in text:
+            await start_los_flow(message, update, context)
+            return
+
+
     if flow == "single_device":
 
         if "မသိ" in text:
@@ -1475,10 +1620,13 @@ TV ဆိုရင် 📺 TV ဖြစ်ပါတယ်။
                 menu(),
             )
             return
-
+  
         if any(
             x in text
-            for x in ["phone", "laptop", "computer", "tv"]
+            for x in [
+                "phone", "laptop", "computer", "tv",
+                "ဖုန်း", "လက်ပ်တော့", "ကွန်ပျူတာ", "တီဗီ"
+            ]
         ):
 
             context.user_data["flow"] = "single_device_result"
@@ -1503,7 +1651,6 @@ WiFi ကို—
             )
             return
 
-    
     if flow == "single_device_result":
 
         if "ရပါ" in text and "မရ" not in text:
@@ -1526,18 +1673,11 @@ Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်�
 
         else:
 
-            await notify_admin(
+            await send_complaint_report(
+                update,
                 context,
-                f"""🚨 Internet Complaint — Device တစ်လုံးတည်း Internet မရ
-
-👤 Customer: {update.effective_user.full_name}
-🆔 Telegram ID: {update.effective_user.id}
-📱 Username: @{update.effective_user.username or 'မရှိပါ'}
-
-📱 ပြဿနာ: WiFi ပြန်ချိတ်ပြီးသော်လည်း Internet မရသေးပါ။
-📞 Customer ကို 09-777719577 မှတစ်ဆင့်
-ဆက်သွယ်စစ်ဆေးပေးပါ။
-"""
+                "Device တစ်လုံးတည်း Internet မရ",
+                "WiFi ပြန်ချိတ်ပြီးသော်လည်း Internet မရသေးပါ။"
             )
 
             reset_flow(context)
@@ -1547,19 +1687,18 @@ Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်�
                 """နားလည်ပါတယ်ခင်ဗျာ။ 🙏
 
 Device တစ်လုံးတည်းမှာ
-Internet မရသေးပါက Device ဘက်ကို
-ထပ်မံစစ်ဆေးရန် လိုအပ်နိုင်ပါတယ်။
+Internet မရသေးတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 📞 Customer Support
-09-777719577 သို့
-ဆက်သွယ်ပေးပါခင်ဗျာ။
+09-777719577
+သို့ ဆက်သွယ်ပေးပါခင်ဗျာ။
 """,
                 update,
                 menu(),
             )
 
         return
-
 
     if flow == "speed":
 
@@ -1596,25 +1735,33 @@ Speed Test ပြီးပါက
             )
             return
 
+      
         if "2" in text or "တစ်လုံး" in text:
 
-            reset_flow(context)
+            context.user_data["flow"] = "speed_single_device_result"
 
             await send_reply(
                 message,
-                """📱 Device တစ်လုံးတည်းမှာ နှေးနေပါက
-Device / WiFi ဘက်က ပြဿနာဖြစ်နိုင်ပါတယ်။
+                """📱 Device တစ်လုံးတည်းမှာ Internet နှေးနေပါက—
 
-WiFi ကို Disconnect → Connect
-ပြန်လုပ်ပြီး စမ်းကြည့်ပါခင်ဗျာ။
+1️⃣ WiFi ကို Disconnect လုပ်ပါ။
+2️⃣ ပြန် Connect လုပ်ပါ။
+3️⃣ Internet Speed ပြန်စမ်းကြည့်ပါ။
 
-မရသေးပါက—
+အခု Internet ပုံမှန်ပြန်ဖြစ်ပါသလား?
 
-📞 Customer Support
-09-777719577
+🟢 ရပါပြီ
+🔴 မရသေးပါဘူး
 """,
                 update,
-                menu(),
+                ReplyKeyboardMarkup(
+                    [
+                        ["🟢 ရပါပြီ"],
+                        ["🔴 မရသေးပါဘူး"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
             )
             return
 
@@ -1672,41 +1819,62 @@ Speed Test ရလဒ် Screenshot ရှိပါက
             await start_app_flow(message, update, context)
             return
 
-    if flow == "speed_test":
+    
+    if flow == "speed_single_device_result":
 
-        if "မသိ" in text:
+        if "ရပါ" in text and "မရ" not in text:
 
             reset_flow(context)
 
             await send_reply(
                 message,
-                """ရပါတယ်ခင်ဗျာ။ 🙏
+                """🟢 Internet ပုံမှန်ပြန်ဖြစ်သွားပါပြီခင်ဗျာ။ 🙏
 
-Speed Test မလုပ်တတ်ပါက
-📞 Customer Support
-09-777719577
-သို့ ဆက်သွယ်နိုင်ပါတယ်။
+Device / WiFi Connection ဘက်က
+ပြဿနာဖြစ်နိုင်ပါတယ်။
 
-မိမိသုံးနေတဲ့ Package Speed ကိုလည်း
-Package / Price မှာ ပြန်ကြည့်နိုင်ပါတယ်။
+နောက်ထပ်အကူအညီလိုပါက
+Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်။
 """,
                 update,
                 menu(),
             )
-            return
 
-        await notify_admin(
+        else:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Device တစ်လုံးတည်း Internet နှေးခြင်း",
+                "WiFi Disconnect / Connect ပြန်လုပ်ပြီးသော်လည်း Internet နှေးနေဆဲဖြစ်သည်။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """နားလည်ပါတယ်ခင်ဗျာ။ 🙏
+
+WiFi ပြန်ချိတ်ပြီးသော်လည်း
+Internet နှေးနေသေးတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+
+📞 Customer Support
+09-777719577
+""",
+                update,
+                menu(),
+            )
+
+        return
+        
+        await send_complaint_report(
+            update,
             context,
-            f"""🚨 Internet Complaint — Speed နှေးခြင်း
-
-👤 Customer: {update.effective_user.full_name}
-🆔 Telegram ID: {update.effective_user.id}
-📱 Username: @{update.effective_user.username or 'မရှိပါ'}
-
-📈 ပြဿနာ: Device အားလုံး Internet နှေးနေပါသည်။
-📸 Speed Test ရလဒ်ကို Support Team မှ စစ်ဆေးပေးပါ။
-"""
+            "Internet နှေးခြင်း",
+            f"Customer ပေးပို့သော Speed Test ရလဒ်: {text}"
         )
+
         
         reset_flow(context)
 
@@ -1726,7 +1894,15 @@ Support Team မှ ဆက်လက်စစ်ဆေးပေးနိုင်
         )
         return
 
+   
     if flow == "speed_night":
+
+        await send_complaint_report(
+            update,
+            context,
+            "ညဘက် Internet ပိုနှေးခြင်း",
+            f"Customer ပြောသော အချိန်: {text}"
+        )
 
         reset_flow(context)
 
@@ -1735,7 +1911,7 @@ Support Team မှ ဆက်လက်စစ်ဆေးပေးနိုင်
             """ကျေးဇူးတင်ပါတယ်ခင်ဗျာ။ 🙏
 
 ညဘက် Internet နှေးတဲ့အချိန်ကို
-Support Team မှ ဆက်လက်စစ်ဆေးပေးနိုင်ပါတယ်။
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 📞 Customer Support
 09-777719577
@@ -1747,29 +1923,6 @@ Support Team မှ ဆက်လက်စစ်ဆေးပေးနိုင်
             menu(),
         )
         return
-
-    if flow == "disconnect":
-
-        if "မသိ" in text:
-
-            await send_reply(
-                message,
-                """ရပါတယ်ခင်ဗျာ။ 🙏
-
-လိုင်းပြတ်တဲ့အချိန်
-ONU / Router ပေါ်မှာ
-🔴 LOS မီးနီလာ/မလာ
-ကို ကြည့်ပေးပါ။
-
-မသေချာပါက
-📞 Customer Support
-09-777719577
-သို့ ဆက်သွယ်နိုင်ပါတယ်။
-""",
-                update,
-                menu(),
-            )
-            return
 
         if "နီ" in text or "ဟုတ်" in text:
 
@@ -1799,15 +1952,22 @@ Internet ပြန်ရတာလား?
 
     if flow == "disconnect_restart":
 
-        reset_flow(context)
-
         if "ဟုတ်" in text:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Internet ခဏခဏပြတ်ခြင်း",
+                "Internet ပြန်ရရန် Router / ONU ကို Restart လုပ်ရသည်။"
+            )
+
+            reset_flow(context)
 
             await send_reply(
                 message,
                 """🔄 Router / ONU ကို Restart လုပ်မှ
-ပြန်ရတယ်ဆိုရင် Router / Connection ဘက်မှာ
-ပြဿနာရှိနိုင်ပါတယ်။
+Internet ပြန်ရတယ်ဆိုရင် Connection ဘက်ကို
+Support Team မှ ဆက်လက်စစ်ဆေးပေးပါမယ်။
 
 ⚠️ RESET ခလုတ်ကို မနှိပ်ပါနဲ့။
 
@@ -1821,13 +1981,22 @@ Internet ပြန်ရတာလား?
 
         else:
 
+            await send_complaint_report(
+                update,
+                context,
+                "Internet ခဏခဏပြတ်ခြင်း",
+                "LOS မနီသော်လည်း Internet ခဏခဏပြတ်နေပြီး Router / WiFi ဘက်ကို စစ်ဆေးရန် လိုအပ်သည်။"
+            )
+
+            reset_flow(context)
+
             await send_reply(
                 message,
                 """နားလည်ပါတယ်ခင်ဗျာ။ 🙏
 
 LOS မနီဘဲ Internet ခဏခဏပြတ်နေပါက
 WiFi / Router အခြေအနေကို
-ဆက်လက်စစ်ဆေးရန် လိုအပ်နိုင်ပါတယ်။
+Support Team မှ ဆက်လက်စစ်ဆေးပေးပါမယ်။
 
 📞 Customer Support
 09-777719577
@@ -1913,19 +2082,17 @@ Password ထည့်ပြီးနောက်
 
     if flow == "wifi_not_found":
 
-        reset_flow(context)
-
         if "ပေါ်လာ" in text and "မပေါ်" not in text:
+
+            reset_flow(context)
 
             await send_reply(
                 message,
                 """🟢 WiFi Name ပြန်ပေါ်လာပါပြီဆိုရင်
 WiFi Connection ကို ပြန်စမ်းကြည့်နိုင်ပါတယ်။
 
-မရသေးပါက
-📞 Customer Support
-09-777719577
-သို့ ဆက်သွယ်နိုင်ပါတယ်။
+မရသေးပါက Internet Problem Menu မှ
+ပြဿနာကို ထပ်ရွေးချယ်နိုင်ပါတယ်။
 """,
                 update,
                 menu(),
@@ -1933,11 +2100,19 @@ WiFi Connection ကို ပြန်စမ်းကြည့်နိုင်
 
         else:
 
+            await send_complaint_report(
+                update,
+                context,
+                "WiFi Name မပေါ်ခြင်း",
+                "WiFi Name ကို ပြန်ရှာပြီး Router အနီးတွင် စမ်းကြည့်သော်လည်း မပေါ်သေးပါ။"
+            )
+
+            reset_flow(context)
+
             await send_reply(
                 message,
-                """🔴 WiFi Name မပေါ်သေးပါက
-Router WiFi Broadcast ဘက်ကို
-စစ်ဆေးရန် လိုအပ်နိုင်ပါတယ်။
+                """🔴 WiFi Name မပေါ်သေးတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 📞 Customer Support
 09-777719577
@@ -1951,60 +2126,118 @@ Router WiFi Broadcast ဘက်ကို
 
     if flow == "wifi_password":
 
-        reset_flow(context)
-
         if "password" in text and "မှား" in text:
+
+            context.user_data["flow"] = "wifi_password_result"
 
             await send_reply(
                 message,
-                """🔐 Password မှားတယ်လို့ ပြပါက
-Password ကို ပြန်စစ်ပြီး
-ထပ်မံချိတ်ကြည့်ပေးပါခင်ဗျာ။
+                """🔐 WiFi Password မှားတယ်လို့ ပြပါက—
 
-Password မသေချာပါက
-📞 Customer Support
-09-777719577
-သို့ ဆက်သွယ်ပေးနိုင်ပါတယ်။
+1️⃣ Password ကို သေချာပြန်စစ်ပါ။
+2️⃣ Password ပြန်ထည့်ပြီး Connect လုပ်ပါ။
+
+အခု WiFi ချိတ်ဆက်လို့ ရပါပြီလား?
 """,
                 update,
-                menu(),
+                ReplyKeyboardMarkup(
+                    [
+                        ["🟢 ရပါပြီ"],
+                        ["🔴 မရသေးပါဘူး"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
             )
             return
 
         if "connecting" in text or "ချိတ်နေ" in text:
 
+            context.user_data["flow"] = "wifi_password_result"
+
             await send_reply(
                 message,
-                """📶 WiFi ကို တွေ့ပြီး
-ချိတ်နေသော်လည်း မချိတ်နိုင်ပါက—
+                """📶 WiFi ကို Forget လုပ်ပြီး
+Password ပြန်ထည့်ကာ Connect လုပ်ကြည့်ပါ။
 
-WiFi ကို Forget လုပ်ပြီး
-Password ပြန်ထည့်ကာ
-Connect လုပ်ကြည့်ပေးပါခင်ဗျာ။
+အခု WiFi ချိတ်ဆက်လို့ ရပါပြီလား?
+""",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["🟢 ရပါပြီ"],
+                        ["🔴 မရသေးပါဘူး"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
 
-မရသေးပါက
-📞 Customer Support
-09-777719577
+        context.user_data["flow"] = "wifi_password_result"
+
+        await send_reply(
+            message,
+            """🟢 WiFi ချိတ်ပြီး Internet မရပါက—
+
+WiFi ကို Disconnect လုပ်ပြီး
+ပြန် Connect လုပ်ကြည့်ပါ။
+
+Internet ပြန်ရပါပြီလား?
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["🟢 ရပါပြီ"],
+                    ["🔴 မရသေးပါဘူး"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+
+    if flow == "wifi_password_result":
+
+        if "ရပါ" in text and "မရ" not in text:
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🟢 WiFi ပြန်ချိတ်ဆက်လို့ ရသွားပါပြီခင်ဗျာ။ 🙏
+
+နောက်ထပ်အကူအညီလိုပါက
+Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်။
 """,
                 update,
                 menu(),
             )
             return
 
+        await send_complaint_report(
+            update,
+            context,
+            "WiFi Password / Connection ပြဿနာ",
+            "Password ပြန်စစ်ခြင်း၊ WiFi Forget လုပ်ပြီး ပြန်ချိတ်ခြင်း သို့မဟုတ် Disconnect / Connect လုပ်ခြင်းတို့ ပြုလုပ်ပြီးသော်လည်း မပြေလည်သေးပါ။"
+        )
+
+        reset_flow(context)
+
         await send_reply(
             message,
-            """🟢 WiFi ချိတ်ပြီး Internet မရပါက
-WiFi ပြဿနာထက် Internet Connection ဘက်ကို
-ဆက်စစ်ရန် လိုအပ်နိုင်ပါတယ်။
+            """🔴 စမ်းသပ်ပြီးသော်လည်း မပြေလည်သေးတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 📞 Customer Support
 09-777719577
-သို့ ဆက်သွယ်ပေးပါခင်ဗျာ။
 """,
             update,
             menu(),
         )
         return
+
 
     if flow == "app":
 
@@ -2035,17 +2268,19 @@ Restart လုပ်ခြင်း စတာတွေ စမ်းကြည့�
             )
             return
 
+        await send_complaint_report(
+            update,
+            context,
+            "Website / App ပြဿနာ",
+            "Customer ပြောကြားချက်အရ အခြား App / Website များလည်း အသုံးပြုမရပါ။"
+        )
+
         await send_reply(
             message,
             """🔴 အခြား App / Website တွေလည်း
-မရဘူးဆိုရင် Internet Connection ဘက်မှာ
-ပြဿနာရှိနိုင်ပါတယ်။
+မရတဲ့အတွက် Support Team ထံ Report
+ပို့ပေးထားပါတယ်။
 
-Internet Problem Menu မှ
-🔧 Internet လုံးဝမရ
-ကို ရွေးပြီး ဆက်စစ်နိုင်ပါတယ်။
-
-မပြေလည်ပါက
 📞 Customer Support
 09-777719577
 """,
@@ -2053,7 +2288,6 @@ Internet Problem Menu မှ
             complaint_menu(),
         )
         return
-
 
 # =========================================================
 # MAIN MESSAGE HANDLER
