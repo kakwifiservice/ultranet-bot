@@ -2214,7 +2214,10 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
     if flow == "app":
 
-        if "မသိ" in text:
+        answer = normalize(text)
+
+        # UNKNOWN
+        if "မသိ" in answer:
 
             await send_complaint_report(
                 update,
@@ -2241,7 +2244,8 @@ Report ပို့ပေးထားပါတယ်။
             )
             return
 
-        if "အခြား App တွေ ရပါတယ်" in text:
+        # OTHER APPS WORK
+        if normalize("အခြား App တွေ ရပါတယ်") in answer:
 
             await send_complaint_report(
                 update,
@@ -2273,7 +2277,8 @@ App Update ရှိပါက Update လုပ်ကြည့်ပါ။
             )
             return
 
-        if "အခြား App တွေလည်း မရပါဘူး" in text:
+        # OTHER APPS ALSO DO NOT WORK
+        if normalize("အခြား App တွေလည်း မရပါဘူး") in answer:
 
             await send_complaint_report(
                 update,
