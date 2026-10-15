@@ -1179,7 +1179,6 @@ async def start_single_device_flow(message, update, context):
         ),
     )
 
-
 # =========================================================
 # APP / WEBSITE FLOW
 # =========================================================
@@ -1197,13 +1196,19 @@ async def start_app_flow(message, update, context):
 အရင်ဆုံး အခြား Website / App တစ်ခုကို
 ဖွင့်ကြည့်ပေးပါခင်ဗျာ။
 
-🟢 အခြား App တွေ ရပါတယ်
-🔴 အခြား App တွေလည်း မရပါဘူး
+အခြား App တွေမှာ Internet ပုံမှန်ရပါသလား?
 """,
         update,
-        yes_no_menu(),
+        ReplyKeyboardMarkup(
+            [
+                ["🟢 အခြား App တွေ ရပါတယ်"],
+                ["🔴 အခြား App တွေလည်း မရပါဘူး"],
+                ["❓ မသိပါဘူး"],
+                ["🔙 Main Menu"],
+            ],
+            resize_keyboard=True,
+        ),
     )
-
 
 # =========================================================
 # INTERNET FLOW HANDLER
@@ -2207,56 +2212,93 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
         )
         return
 
-
     if flow == "app":
 
-        reset_flow(context)
+        if "မသိ" in text:
 
-        if "ရပါတယ်" in text or (
-            "ရ" in text and "မရ" not in text
-        ):
+            await send_complaint_report(
+                update,
+                context,
+                "Website / App ပြဿနာ",
+                "Customer သည် အခြား App များတွင် Internet ရ/မရ မသိပါ။ Support Team မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
+
+            reset_flow(context)
 
             await send_reply(
                 message,
-                """🟢 အခြား App / Website တွေ ရတယ်ဆိုရင်
-Internet လိုင်းတစ်ခုလုံး ပြဿနာမဟုတ်နိုင်ပါ။
+                """❓ နားလည်ပါတယ်ခင်ဗျာ။ 🙏
 
-မရတဲ့ App / Website ဘက်က
-ပြဿနာဖြစ်နိုင်ပါတယ်။
+အခြား App တွေမှာ Internet ရ/မရ
+မသေချာတဲ့အတွက် Support Team ထံ
+Report ပို့ပေးထားပါတယ်။
 
-App ကို Update လုပ်ခြင်း၊
-Restart လုပ်ခြင်း စတာတွေ စမ်းကြည့်နိုင်ပါတယ်။
-
-မပြေလည်သေးပါက
 📞 Customer Support
 09-777719577
-သို့ ဆက်သွယ်နိုင်ပါတယ်။
 """,
                 update,
                 menu(),
             )
             return
 
-        await send_complaint_report(
-            update,
-            context,
-            "Website / App ပြဿနာ",
-            "Customer ပြောကြားချက်အရ အခြား App / Website များလည်း အသုံးပြုမရပါ။"
-        )
+        if "အခြား App တွေ ရပါတယ်" in text:
 
-        await send_reply(
-            message,
-            """🔴 အခြား App / Website တွေလည်း
-မရတဲ့အတွက် Support Team ထံ Report
-ပို့ပေးထားပါတယ်။
+            await send_complaint_report(
+                update,
+                context,
+                "Website / App တစ်ခုတည်း ပြဿနာဖြစ်ခြင်း",
+                "Customer အဖြေအရ အခြား App များတွင် Internet ပုံမှန်ရပြီး သက်ဆိုင်ရာ App / Website တစ်ခုတည်းတွင် ပြဿနာဖြစ်နေသည်။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🟢 အခြား App တွေ ရတယ်ဆိုရင်
+Internet လိုင်းတစ်ခုလုံး ပြတ်နေခြင်း
+မဟုတ်နိုင်ပါဘူးခင်ဗျာ။
+
+မရတဲ့ App / Website ကို
+ပိတ်ပြီး ပြန်ဖွင့်ကြည့်ပါ။
+App Update ရှိပါက Update လုပ်ကြည့်ပါ။
+
+မပြေလည်သေးပါက Support Team ထံ
+ဆက်သွယ်စစ်ဆေးနိုင်ပါတယ်။
 
 📞 Customer Support
 09-777719577
 """,
-            update,
-            complaint_menu(),
-        )
-        return
+                update,
+                menu(),
+            )
+            return
+
+        if "အခြား App တွေလည်း မရပါဘူး" in text:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Website / App ပြဿနာ",
+                "Customer အဖြေအရ အခြား App များတွင်လည်း Internet အသုံးပြုမရပါ။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🔴 အခြား App တွေလည်း မရတဲ့အတွက်
+Internet Connection ဘက်ကို
+Support Team မှ ဆက်လက်စစ်ဆေးပေးပါမယ်။
+
+Report ပို့ပေးထားပါတယ်ခင်ဗျာ။
+
+📞 Customer Support
+09-777719577
+""",
+                update,
+                menu(),
+            )
+            return
 
 # =========================================================
 # MAIN MESSAGE HANDLER
