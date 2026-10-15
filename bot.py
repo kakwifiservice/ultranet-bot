@@ -1679,23 +1679,18 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
         if "1" in text or "အားလုံး" in text:
 
             context.user_data["flow"] = "speed_test"
+            context.user_data["speed_type"] = "Device အားလုံး Internet နှေးခြင်း"
 
             await send_reply(
                 message,
-                """📈 Device အားလုံးမှာ နှေးနေပါက
+                """📈 Device အားလုံးမှာ Internet နှေးနေပါက
+
 Speed Test စစ်ပေးပါမယ်ခင်ဗျာ။
 
-အရင်ဆုံး Speed Test လုပ်ပေးပါ။
+Download / Upload Speed ကို ကြည့်ပေးပါ။
+ရလဒ်ကို စာဖြင့် ပြန်ပို့နိုင်ပါတယ်။
 
-Speed Test ရလဒ်မှာ
-Download / Upload Speed ကို
-ကြည့်ပေးပါ။
-
-📸 ရလဒ် Screenshot ရှိပါက
-ပို့ပေးနိုင်ပါတယ်။
-
-Speed Test ပြီးပါက
-ရလဒ်ကို ပြန်ပို့ပေးပါခင်ဗျာ။
+မစစ်တတ်ပါက ❓ မသိပါဘူး ကို ရွေးပါ။
 """,
                 update,
                 ReplyKeyboardMarkup(
@@ -1709,7 +1704,6 @@ Speed Test ပြီးပါက
             )
             return
 
-      
         if "2" in text or "တစ်လုံး" in text:
 
             context.user_data["flow"] = "speed_single_device_result"
@@ -1723,9 +1717,6 @@ Speed Test ပြီးပါက
 3️⃣ Internet Speed ပြန်စမ်းကြည့်ပါ။
 
 အခု Internet ပုံမှန်ပြန်ဖြစ်ပါသလား?
-
-🟢 ရပါပြီ
-🔴 မရသေးပါဘူး
 """,
                 update,
                 ReplyKeyboardMarkup(
@@ -1746,12 +1737,10 @@ Speed Test ပြီးပါက
             await send_reply(
                 message,
                 """🌙 ညဘက်မှာ ပိုနှေးတယ်ဆိုရင်
-ဘယ်အချိန်လောက်မှာ စပြီး
-နှေးလာတတ်ပါသလဲခင်ဗျာ?
+ဘယ်အချိန်လောက်မှာ စပြီး နှေးလာတတ်ပါသလဲခင်ဗျာ?
 
-ဥပမာ—
-8:00 PM / 9:00 PM / 10:00 PM
-စသဖြင့် အချိန်ကို ပြောပေးနိုင်ပါတယ်။
+ဥပမာ - 8:00 PM / 9:00 PM / 10:00 PM
+အချိန်ကို ပြောပေးပါ။
 """,
                 update,
                 ReplyKeyboardMarkup(
@@ -1764,17 +1753,15 @@ Speed Test ပြီးပါက
         if "4" in text or "အချိန်တိုင်း" in text:
 
             context.user_data["flow"] = "speed_test"
+            context.user_data["speed_type"] = "အချိန်တိုင်း Internet နှေးခြင်း"
 
             await send_reply(
                 message,
-                """📈 အချိန်တိုင်းနှေးနေပါက
-Speed Test စစ်ပေးပါခင်ဗျာ။
+                """📈 အချိန်တိုင်း Internet နှေးနေပါက
+Speed Test ရလဒ်ကို စစ်ဆေးပေးပါမယ်။
 
-Speed Test ရလဒ် Screenshot ရှိပါက
-ပို့ပေးနိုင်ပါတယ်။
-
-📸 Speed Test ရပြီးပါပြီ
-ဆိုပြီး ပြန်ပို့ပေးပါ။
+Download / Upload Speed ကို ပြန်ပို့ပေးပါ။
+မစစ်တတ်ပါက ❓ မသိပါဘူး ကို ရွေးပါ။
 """,
                 update,
                 ReplyKeyboardMarkup(
@@ -1793,41 +1780,72 @@ Speed Test ရလဒ် Screenshot ရှိပါက
             await start_app_flow(message, update, context)
             return
 
-    
-    if flow == "speed_single_device_result":
 
-        if "ရပါ" in text and "မရ" not in text:
+    # SPEED TEST: Option 1 and Option 4
+    if flow == "speed_test":
 
-            reset_flow(context)
+        speed_type = context.user_data.get(
+            "speed_type",
+            "Internet နှေးခြင်း",
+        )
 
-            await send_reply(
-                message,
-                """🟢 Internet ပုံမှန်ပြန်ဖြစ်သွားပါပြီခင်ဗျာ။ 🙏
+        if "မသိ" in text:
 
-Device / WiFi Connection ဘက်က
-ပြဿနာဖြစ်နိုင်ပါတယ်။
+            result = (
+                "Customer သည် Speed Test ကို မစစ်တတ်ပါ။ "
+                "Support Team မှ ဆက်သွယ်စစ်ဆေးပေးရန် လိုအပ်သည်။"
+            )
 
-နောက်ထပ်အကူအညီလိုပါက
-Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်။
-""",
-                update,
-                menu(),
+        elif "ရပြီးပါပြီ" in text:
+
+            result = (
+                "Customer က Speed Test ပြီးကြောင်း အတည်ပြုထားသည်။ "
+                "Speed Test ရလဒ်ကို Support Team မှ ဆက်လက်စစ်ဆေးရန်။"
             )
 
         else:
 
-            await send_complaint_report(
-                update,
-                context,
-                "Device တစ်လုံးတည်း Internet နှေးခြင်း",
-                "WiFi Disconnect / Connect ပြန်လုပ်ပြီးသော်လည်း Internet နှေးနေဆဲဖြစ်သည်။"
+            result = f"Customer ပေးပို့သော Speed Test ရလဒ်: {text}"
+
+        await send_complaint_report(
+            update,
+            context,
+            speed_type,
+            result,
+        )
+
+        reset_flow(context)
+
+        await send_reply(
+            message,
+            """ကျေးဇူးတင်ပါတယ်ခင်ဗျာ။ 🙏
+
+Internet နှေးခြင်းဆိုင်ရာ အချက်အလက်ကို
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+
+လိုအပ်ပါက Support Team မှ
+ဆက်သွယ်စစ်ဆေးပေးပါမယ်။
+
+📞 Customer Support
+09-777719577
+""",
+            update,
+            menu(),
+        )
+        return
+
+
+    # SINGLE DEVICE: Option 2
+    if flow == "speed_single_device_result":
+
+        if "မရသေး" in text or "မရ" in text:
+
+            result = (
+                "WiFi Disconnect / Connect ပြန်လုပ်ပြီးသော်လည်း "
+                "Internet နှေးနေဆဲဖြစ်သည်။"
             )
 
-            reset_flow(context)
-
-            await send_reply(
-                message,
-                """နားလည်ပါတယ်ခင်ဗျာ။ 🙏
+            response = """နားလည်ပါတယ်ခင်ဗျာ။ 🙏
 
 WiFi ပြန်ချိတ်ပြီးသော်လည်း
 Internet နှေးနေသေးတဲ့အတွက်
@@ -1835,47 +1853,50 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 📞 Customer Support
 09-777719577
-""",
-                update,
-                menu(),
+"""
+
+        elif "ရပါ" in text:
+
+            result = (
+                "WiFi Disconnect / Connect ပြန်လုပ်ပြီးနောက် "
+                "Internet ပုံမှန်ပြန်ဖြစ်သွားသည်။"
             )
 
-        return
-        
+            response = """🟢 Internet ပုံမှန်ပြန်ဖြစ်သွားပါပြီခင်ဗျာ။ 🙏
+
+ပြဿနာနှင့် ပြန်လည်စမ်းသပ်ရလဒ်ကို
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+"""
+
+        else:
+            return
+
         await send_complaint_report(
             update,
             context,
-            "Internet နှေးခြင်း",
-            f"Customer ပေးပို့သော Speed Test ရလဒ်: {text}"
+            "Device တစ်လုံးတည်း Internet နှေးခြင်း",
+            result,
         )
 
-        
         reset_flow(context)
 
         await send_reply(
             message,
-            """📈 Speed Test ရလဒ်ကို
-Support Team မှ ဆက်လက်စစ်ဆေးပေးနိုင်ပါတယ်။
-
-📞 Customer Support
-09-777719577
-
-📸 Speed Test Screenshot ရှိပါက
-ပို့ပေးနိုင်ပါတယ်။
-""",
+            response,
             update,
             menu(),
         )
         return
 
-   
+
+    # NIGHT SLOW: Option 3
     if flow == "speed_night":
 
         await send_complaint_report(
             update,
             context,
             "ညဘက် Internet ပိုနှေးခြင်း",
-            f"Customer ပြောသော အချိန်: {text}"
+            f"Customer ပြောသော အချိန်: {text}",
         )
 
         reset_flow(context)
@@ -1895,32 +1916,6 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
 """,
             update,
             menu(),
-        )
-        return
-
-        if "နီ" in text or "ဟုတ်" in text:
-
-            await start_los_flow(message, update, context)
-            return
-
-        context.user_data["flow"] = "disconnect_restart"
-
-        await send_reply(
-            message,
-            """ဟုတ်ကဲ့ခင်ဗျာ။ 🙏
-
-LOS မီးမနီဘဲ Internet ခဏခဏပြတ်နေပါက
-Router / WiFi ဘက်ကို ဆက်စစ်ပါမယ်။
-
-လိုင်းပြတ်ပြီးနောက်
-Router / ONU ကို Restart လုပ်မှ
-Internet ပြန်ရတာလား?
-
-🔄 ဟုတ်ပါတယ်
-❌ မဟုတ်ပါဘူး
-""",
-            update,
-            yes_no_menu(),
         )
         return
 
