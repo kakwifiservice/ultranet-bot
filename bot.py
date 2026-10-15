@@ -1923,6 +1923,102 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
             menu(),
         )
         return
+    
+    if flow == "disconnect":
+
+        answer = normalize(text)
+
+        # LOS မီးနီနေသည်
+        if normalize("🔴 LOS နီနေပါတယ်") in answer:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Internet ခဏခဏပြတ်ခြင်း",
+                "Customer အဖြေအရ LOS မီးနီနေသည်။ RESET မနှိပ်ရန် အသိပေးပြီး Line 1 / Support Team မှ အမြန်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🔴 LOS မီးနီနေတယ်ဆိုရင်
+Fiber လိုင်းအချက်ပြပြဿနာ ဖြစ်နိုင်ပါတယ်။
+
+⚠️ Router / ONU ပေါ်က RESET ခလုတ်ကို
+မနှိပ်ပါနဲ့ခင်ဗျာ။
+
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+
+📞 Customer Support
+09-777719577
+""",
+                update,
+                menu(),
+            )
+            return
+
+        # LOS မီးနီမဟုတ်ပါ
+        if normalize("🟢 LOS မနီပါဘူး") in answer:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Internet ခဏခဏပြတ်ခြင်း",
+                "Customer အဖြေအရ LOS မီးနီမဟုတ်သော်လည်း Internet ခဏခဏပြတ်နေသည်။ Router / WiFi / Connection ဘက်ကို ဆက်လက်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🟢 LOS မီးနီမဟုတ်ဘဲ Internet
+ခဏခဏပြတ်နေတယ်ဆိုရင် Connection
+အခြေအနေကို ဆက်လက်စစ်ဆေးဖို့ လိုပါတယ်။
+
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+
+📞 Customer Support
+09-777719577
+""",
+                update,
+                menu(),
+            )
+            return
+
+        # မီးအခြေအနေ မသိပါ
+        if "မသိ" in answer:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Internet ခဏခဏပြတ်ခြင်း",
+                "Customer သည် LOS မီးနီ/မနီ အခြေအနေကို မသိပါ။ Support Team မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """❓ ရပါတယ်ခင်ဗျာ။ 🙏
+
+LOS မီးအခြေအနေ မသေချာတဲ့အတွက်
+Support Team ထံ Report ပို့ပေးထားပါတယ်။
+
+📞 Customer Support
+09-777719577
+""",
+                update,
+                menu(),
+            )
+            return
+
+        await send_reply(
+            message,
+            "အောက်က ခလုတ် ၃ ခုထဲက တစ်ခုကို ရွေးပေးပါခင်ဗျာ။",
+            yes_no_menu(),
+        )
+        return
 
     if flow == "disconnect_restart":
 
