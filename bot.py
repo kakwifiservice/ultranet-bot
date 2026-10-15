@@ -93,49 +93,23 @@ async def notify_admin(context: ContextTypes.DEFAULT_TYPE, message: str) -> bool
 def user_details(update: Update) -> str:
     user = update.effective_user
     chat = update.effective_chat
-    if not user:# -*- coding: utf-8 -*-
 
-import os
-import re
+    if not user:
+        return "Customer information unavailable"
 
-from telegram import (
-    Update,
-    ReplyKeyboardMarkup,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters,
-)
+    username = f"@{user.username}" if user.username else "မရှိပါ"
+    full_name = user.full_name or "မရှိပါ"
+    telegram_id = user.id
+    chat_id = chat.id if chat else "မရှိပါ"
 
+    return (
+        f"👤 Customer: {full_name}\n"
+        f"📱 Username: {username}\n"
+        f"🆔 Telegram ID: {telegram_id}\n"
+        f"💬 Chat ID: {chat_id}"
+    )
 
-# =========================================================
-# BOT TOKEN
-# =========================================================
-
-TOKEN = os.getenv("BOT_TOKEN", "").strip()
-
-BOT_NAME = "Ultra Net KAK WiFi Internet Service Provider"
-
-
-ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "").strip()
-
-
-async def notify_admin(context, text):
-    if not ADMIN_CHAT_ID:
-        return
-
-    try:
-        await context.bot.send_message(
-            chat_id=int(ADMIN_CHAT_ID),
-            text=text,
-        )
-    except Exception as e:
-        print(f"Admin notification failed: {e}")
+TOKEN = BOT_TOKEN
 
 async def send_complaint_report(update, context, problem, result):
     user = update.effective_user
