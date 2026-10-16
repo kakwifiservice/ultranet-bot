@@ -2095,9 +2095,12 @@ Support Team မှ ဆက်လက်စစ်ဆေးပေးပါမယ်
 
         return
 
+    
     if flow == "wifi":
 
-        if "မသိ" in text:
+        answer = normalize(text)
+
+        if "မသိ" in answer:
 
             await send_reply(
                 message,
@@ -2108,13 +2111,35 @@ WiFi Name (SSID) ဆိုတာ
 WiFi နာမည်ပါ။
 
 ဥပမာ—
-Ultra Net XXXXX
+Ko Aye Ko XXXXX
 
 အဲဒီနာမည်ကို တွေ့/မတွေ့
 ကြည့်ပေးပါခင်ဗျာ။
 """,
                 update,
-                yes_no_menu(),
+                wifi_ssid_menu(),
+            )
+            return
+
+        if normalize("မတွေ့ပါဘူး") in answer or normalize("မရှိပါဘူး") in answer:
+
+            context.user_data["flow"] = "wifi_not_found"
+
+            await send_reply(
+                message,
+                """🔴 WiFi Name မတွေ့ပါက—
+
+1️⃣ Router / ONU Power မီး လင်း/မလင်း စစ်ပါ။
+2️⃣ WiFi ကို ဖုန်းမှာ ပြန်ရှာပါ။
+3️⃣ Router အနီးမှာ စမ်းကြည့်ပါ။
+
+အခု WiFi Name ပြန်ပေါ်လာပါသလား?
+
+🟢 ပေါ်လာပါပြီ
+🔴 မပေါ်သေးပါဘူး
+""",
+                update,
+                wifi_name_recheck_menu(),
             )
             return
 
