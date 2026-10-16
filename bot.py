@@ -1546,14 +1546,8 @@ Router / ONU ရဲ့ Power မီးက
             )
             return
 
+        
         if "လင်းပါတယ်" in text:
-
-            await send_complaint_report(
-                update,
-                context,
-                "Router / ONU Power မီး",
-                "Customer အဖြေအရ Router / ONU Power မီး လင်းနေသည်။ Router / ONU အခြေအနေကို စစ်ဆေးရန် Report ပို့ထားသည်။"
-            )
 
             context.user_data["flow"] = "router_lights"
 
@@ -1561,6 +1555,7 @@ Router / ONU ရဲ့ Power မီးက
                 message,
                 """🟢 Power မီး လင်းနေပါတယ်ခင်ဗျာ။ 🙏
 
+Power မီးက ပုံမှန်လင်းနေတယ်ဆိုရင်
 အခု PON / LOS မီးအခြေအနေကို
 ဆက်စစ်ကြည့်ပေးပါမယ်။
 
