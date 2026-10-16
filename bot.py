@@ -331,7 +331,20 @@ def yes_no_menu():
         resize_keyboard=True,
     )
 
+# =========================================================
+# ROUTER POWER MENU
+# =========================================================
 
+def router_power_menu():
+    return ReplyKeyboardMarkup(
+        [
+            ["🟢 လင်းပါတယ်"],
+            ["🔴 မလင်းပါဘူး"],
+            ["❓ မသိပါဘူး"],
+            ["🔙 Main Menu"],
+        ],
+        resize_keyboard=True,
+    )
 
 # =========================================================
 # INSTALLATION PACKAGE MENU
@@ -1165,7 +1178,7 @@ async def start_router_flow(message, update, context):
 ❓ မသိပါဘူး
 """,
         update,
-        yes_no_menu(),
+        router_power_menu(),
     )
 
 
@@ -1469,7 +1482,21 @@ Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်�
 
     if flow == "router":
 
+        answer = normalize(text)
+
+        if "mainmenu" in answer or "🔙mainmenu" in answer:
+            reset_flow(context)
+            await send_reply(message, "Main Menu သို့ ပြန်သွားပါပြီ။", update, menu())
+            return
+
         if "မသိ" in text:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Router / ONU Power မီး",
+                "Customer သည် Power မီး လင်း/မလင်း အခြေအနေကို မသိပါ။ Support Team မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
 
             reset_flow(context)
 
@@ -1478,8 +1505,7 @@ Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်�
                 """ရပါတယ်ခင်ဗျာ။ 🙏
 
 Router / ONU ရဲ့ Power မီးက
-များသောအားဖြင့် ⚡ Power ဆိုတဲ့စာတန်းနားမှာ
-ရှိပါတယ်။
+များသောအားဖြင့် ⚡ Power ဆိုတဲ့စာတန်းနားမှာ ရှိပါတယ်။
 
 မီးလင်းနေရင် 🟢
 မလင်းရင် 🔴 ဖြစ်ပါတယ်။
@@ -1520,6 +1546,31 @@ Router / ONU ရဲ့ Power မီးက
             )
             return
 
+        if "လင်းပါတယ်" in text:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Router / ONU Power မီး",
+                "Customer အဖြေအရ Router / ONU Power မီး လင်းနေသည်။ Router / ONU အခြေအနေကို စစ်ဆေးရန် Report ပို့ထားသည်။"
+            )
+
+            context.user_data["flow"] = "router_lights"
+
+            await send_reply(
+                message,
+                """🟢 Power မီး လင်းနေပါတယ်ခင်ဗျာ။ 🙏
+
+အခု PON / LOS မီးအခြေအနေကို
+ဆက်စစ်ကြည့်ပေးပါမယ်။
+
+🔴 LOS နီနေပါသလား?
+""",
+                update,
+                yes_no_menu(),
+            )
+            return
+
         context.user_data["flow"] = "router_lights"
 
         await send_reply(
@@ -1537,9 +1588,23 @@ PON / LOS မီးကို ဆက်စစ်ပေးပါမယ်။
 
     if flow == "router_power_check":
 
+        answer = normalize(text)
+
+        if "mainmenu" in answer or "🔙mainmenu" in answer:
+            reset_flow(context)
+            await send_reply(message, "Main Menu သို့ ပြန်သွားပါပြီ။", update, menu())
+            return
+
         if "ပြန်လင်း" in text and "မလင်း" not in text:
 
-            reset_flow(context)
+            await send_complaint_report(
+                update,
+                context,
+                "Router / ONU Power မီး",
+                "Customer အဖြေအရ Power မီး ပြန်လင်းလာပါပြီ။ PON / LOS မီးအခြေအနေ ဆက်လက်စစ်ဆေးရန် Report ပို့ထားသည်။"
+            )
+
+            context.user_data["flow"] = "router_lights"
 
             await send_reply(
                 message,
@@ -1548,26 +1613,27 @@ PON / LOS မီးကို ဆက်စစ်ပေးပါမယ်။
 အခု PON / LOS မီးအခြေအနေကို
 ဆက်စစ်ကြည့်ပေးပါ။
 
-ပြဿနာရှိနေသေးပါက
-Internet Problem Menu မှ ပြန်ရွေးနိုင်ပါတယ်။
+🔴 LOS နီနေပါသလား?
 """,
                 update,
-                complaint_menu(),
+                yes_no_menu(),
             )
             return
 
-        await send_complaint_report(
-            update,
-            context,
-            "Router / ONU Power မီးမလင်းခြင်း",
-            "Power Adapter၊ Power Socket နှင့် ချိတ်ဆက်မှုကို စစ်ဆေးပြီးနောက် Power မီး မလင်းသေးပါ။"
-        )
+        if "မလင်း" in text or "မသေး" in text:
 
-        reset_flow(context)
+            await send_complaint_report(
+                update,
+                context,
+                "Router / ONU Power မီးမလင်းခြင်း",
+                "Power Adapter၊ Power Socket နှင့် ချိတ်ဆက်မှုကို စစ်ဆေးပြီးနောက် Power မီး မလင်းသေးပါ။"
+            )
 
-        await send_reply(
-            message,
-            """🔴 Power မီး မလင်းသေးတဲ့အတွက်
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """🔴 Power မီး မလင်းသေးတဲ့အတွက်
 Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
 ⚠️ RESET ခလုတ်ကို မနှိပ်ပါနဲ့။
@@ -1576,10 +1642,10 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
 09-777719577
 သို့ ဆက်သွယ်ပေးပါခင်ဗျာ။
 """,
-            update,
-            menu(),
-        )
-        return
+                update,
+                menu(),
+            )
+            return
 
     if flow == "router_lights":
 
