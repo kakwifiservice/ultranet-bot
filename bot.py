@@ -1668,7 +1668,6 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
             await start_los_flow(message, update, context)
             return
 
-
     if flow == "single_device":
 
         if "မသိ" in text:
@@ -1683,13 +1682,14 @@ Computer / Laptop ဆိုရင် 💻 Laptop
 TV ဆိုရင် 📺 TV ဖြစ်ပါတယ်။
 
 မသေချာရင်
-📞 Customer Support ကို ဆက်သွယ်နိုင်ပါတယ်။
+📞 Customer Support — 09-777719577
+ကို ဆက်သွယ်နိုင်ပါတယ်။
 """,
                 update,
                 menu(),
             )
             return
-  
+
         if any(
             x in text
             for x in [
@@ -1711,16 +1711,31 @@ WiFi ကို—
 3️⃣ Internet ပြန်ရ/မရ စမ်းကြည့်ပါ။
 
 အခု Internet ပြန်ရပါသလား?
-
-🟢 ရပါပြီ
-🔴 မရသေးပါဘူး
 """,
                 update,
-                yes_no_menu(),
+                ReplyKeyboardMarkup(
+                    [
+                        ["🟢 ရပါပြီ"],
+                        ["🔴 မရသေးပါဘူး"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
             )
             return
 
     if flow == "single_device_result":
+
+        if "mainmenu" in normalize(text):
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                "Main Menu သို့ ပြန်သွားပါပြီ။",
+                update,
+                menu(),
+            )
+            return
 
         if "ရပါ" in text and "မရ" not in text:
 
@@ -1731,16 +1746,18 @@ WiFi ကို—
                 """🟢 အဆင်ပြေပါပြီခင်ဗျာ။ 🙏
 
 WiFi ကို ပြန်ချိတ်ပြီး Internet ရပြီဆိုရင်
-Device Connection ဘက်က ပြဿနာဖြစ်နိုင်ပါတယ်။
+လက်ရှိ Device Connection ဘက်က
+ပြဿနာဖြစ်နိုင်ပါတယ်။
 
-နောက်ထပ်အကူအညီလိုပါက
+နောက်ထပ် အကူအညီလိုပါက
 Menu မှ ပြန်ရွေးချယ်နိုင်ပါတယ်။
 """,
                 update,
                 menu(),
             )
+            return
 
-        else:
+        if "မရ" in text:
 
             await send_complaint_report(
                 update,
@@ -1766,8 +1783,7 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
                 update,
                 menu(),
             )
-
-        return
+            return
 
     if flow == "speed":
 
