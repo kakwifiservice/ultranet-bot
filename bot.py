@@ -2136,7 +2136,7 @@ Ultra Net XXXXX
 🔴 မပေါ်သေးပါဘူး
 """,
                 update,
-                yes_no_menu(),
+                wifi_name_recheck_menu(),
             )
             return
 
