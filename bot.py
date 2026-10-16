@@ -1130,7 +1130,19 @@ def wifi_ssid_menu():
         resize_keyboard=True,
     )
 
+# =========================================================
+# WIFI NAME RECHECK MENU
+# =========================================================
 
+def wifi_name_recheck_menu():
+    return ReplyKeyboardMarkup(
+        [
+            ["🟢 ပေါ်လာပါပြီ"],
+            ["🔴 မပေါ်သေးပါဘူး"],
+            ["🔙 Main Menu"],
+        ],
+        resize_keyboard=True,
+    )
 
 # =========================================================
 # ROUTER FLOW
