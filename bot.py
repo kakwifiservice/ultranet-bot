@@ -1041,43 +1041,41 @@ LOS မီး အခုထိ နီနေသေးပါသလား?
     )
 
 
+
 # =========================================================
 # SPEED FLOW
 # =========================================================
 
 async def start_speed_flow(message, update, context):
 
-    context.user_data["flow"] = "speed"
+    context.user_data["flow"] = "speed_apps"
+    context.user_data["speed_apps"] = []
 
     await send_reply(
         message,
-        """🐌 နားလည်ပါတယ်ခင်ဗျာ။ 🙏
+        """🐌 Internet နှေးနေတဲ့အခြေအနေကို
+တစ်ဆင့်ချင်း စစ်ဆေးပေးပါမယ်ခင်ဗျာ။ 🙏
 
-Internet Speed နှေးနေတဲ့အခြေအနေကို
-တစ်ဆင့်ချင်း ကူညီစစ်ဆေးပေးပါမယ်။
+📱 ဘယ် App / Service တွေမှာ
+Internet နှေးနေတာလဲ?
 
-ဘယ်လိုအခြေအနေမှာ ဖြစ်နေလဲ?
+အောက်က သက်ဆိုင်ရာ App တွေကို ရွေးပေးပါ။
+ပြီးရင် “✅ ရွေးပြီးပါပြီ” ကို နှိပ်ပေးပါ။
 
-1️⃣ Device အားလုံးမှာ နှေးပါတယ်
-2️⃣ Device တစ်လုံးတည်းမှာ နှေးပါတယ်
-3️⃣ ညဘက်မှာ ပိုနှေးပါတယ်
-4️⃣ အချိန်တိုင်း နှေးပါတယ်
-5️⃣ App / Website တစ်ခုမှာပဲ နှေးပါတယ်
-""",
+တစ်ခုထက်ပိုပြီး ရွေးနိုင်ပါတယ်ခင်ဗျာ။""",
         update,
         ReplyKeyboardMarkup(
             [
-                ["1️⃣ အားလုံးနှေး"],
-                ["2️⃣ တစ်လုံးတည်းနှေး"],
-                ["3️⃣ ညဘက်ပိုနှေး"],
-                ["4️⃣ အချိန်တိုင်းနှေး"],
-                ["5️⃣ App တစ်ခုတည်းနှေး"],
+                ["▶️ YouTube", "🎵 TikTok"],
+                ["📘 Facebook", "💬 Viber"],
+                ["🔎 Google / Website", "🎮 Game"],
+                ["📱 App အားလုံး"],
+                ["✅ ရွေးပြီးပါပြီ"],
                 ["🔙 Main Menu"],
             ],
             resize_keyboard=True,
         ),
     )
-
 
 # =========================================================
 # DISCONNECT FLOW
@@ -1785,28 +1783,210 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
             )
             return
 
-    if flow == "speed":
+    # =====================================================
+    # NEW INTERNET SPEED COMPLAINT FLOW
+    # =====================================================
 
-        if "1" in text or "အားလုံး" in text:
+    raw = message.text.strip()
 
-            context.user_data["flow"] = "speed_test"
-            context.user_data["speed_type"] = "Device အားလုံး Internet နှေးခြင်း"
+    # APP SELECTION
+    if flow == "speed_apps":
+
+        app_options = [
+            "▶️ YouTube",
+            "🎵 TikTok",
+            "📘 Facebook",
+            "💬 Viber",
+            "🔎 Google / Website",
+            "🎮 Game",
+            "📱 App အားလုံး",
+        ]
+
+        selected = context.user_data.get("speed_apps", [])
+
+        if raw in app_options:
+
+            if raw == "📱 App အားလုံး":
+                selected = ["📱 App အားလုံး"]
+            else:
+                selected = [
+                    item for item in selected
+                    if item != "📱 App အားလုံး"
+                ]
+
+                if raw in selected:
+                    selected.remove(raw)
+                else:
+                    selected.append(raw)
+
+            context.user_data["speed_apps"] = selected
+
+            selected_text = (
+                "\n".join(selected)
+                if selected
+                else "မရွေးရသေးပါ"
+            )
 
             await send_reply(
                 message,
-                """📈 Device အားလုံးမှာ Internet နှေးနေပါက
-
-Speed Test စစ်ပေးပါမယ်ခင်ဗျာ။
-
-Download / Upload Speed ကို ကြည့်ပေးပါ။
-ရလဒ်ကို စာဖြင့် ပြန်ပို့နိုင်ပါတယ်။
-
-မစစ်တတ်ပါက ❓ မသိပါဘူး ကို ရွေးပါ။
-""",
+                "📱 ရွေးထားသော App / Service များ\n\n"
+                f"{selected_text}\n\n"
+                "နောက်ထပ် App တွေကိုလည်း ရွေးနိုင်ပါတယ်။\n"
+                "ရွေးချယ်ပြီးပါက “✅ ရွေးပြီးပါပြီ” ကို နှိပ်ပါ။",
                 update,
                 ReplyKeyboardMarkup(
                     [
-                        ["📸 Speed Test ရပြီးပါပြီ"],
+                        ["▶️ YouTube", "🎵 TikTok"],
+                        ["📘 Facebook", "💬 Viber"],
+                        ["🔎 Google / Website", "🎮 Game"],
+                        ["📱 App အားလုံး"],
+                        ["✅ ရွေးပြီးပါပြီ"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        if raw == "✅ ရွေးပြီးပါပြီ":
+
+            if not selected:
+                await send_reply(
+                    message,
+                    "❗ App / Service အနည်းဆုံးတစ်ခု ရွေးပေးပါခင်ဗျာ။",
+                    update,
+                    ReplyKeyboardMarkup(
+                        [
+                            ["▶️ YouTube", "🎵 TikTok"],
+                            ["📘 Facebook", "💬 Viber"],
+                            ["🔎 Google / Website", "🎮 Game"],
+                            ["📱 App အားလုံး"],
+                            ["✅ ရွေးပြီးပါပြီ"],
+                            ["🔙 Main Menu"],
+                        ],
+                        resize_keyboard=True,
+                    ),
+                )
+                return
+
+            context.user_data["flow"] = "speed_time"
+
+            await send_reply(
+                message,
+                """⏰ ဘယ်အချိန်တွေမှာ Internet နှေးနေတာလဲခင်ဗျာ?
+
+အောက်က သက်ဆိုင်ရာအချိန်ကို ရွေးပေးပါ။""",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["⏱️ အချိန်တိုင်း နှေးပါတယ်"],
+                        ["🌅 မနက်ပိုင်း"],
+                        ["☀️ နေ့လယ်ပိုင်း"],
+                        ["🌇 ညနေပိုင်း"],
+                        ["🌙 ညပိုင်း"],
+                        ["🔄 တစ်ခါတလေမှ နှေးပါတယ်"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        await send_reply(
+            message,
+            "App / Service ကို ရွေးပါ၊ ပြီးရင် “✅ ရွေးပြီးပါပြီ” ကို နှိပ်ပါ။",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["▶️ YouTube", "🎵 TikTok"],
+                    ["📘 Facebook", "💬 Viber"],
+                    ["🔎 Google / Website", "🎮 Game"],
+                    ["📱 App အားလုံး"],
+                    ["✅ ရွေးပြီးပါပြီ"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # TIME SELECTION
+    if flow == "speed_time":
+
+        time_options = [
+            "⏱️ အချိန်တိုင်း နှေးပါတယ်",
+            "🌅 မနက်ပိုင်း",
+            "☀️ နေ့လယ်ပိုင်း",
+            "🌇 ညနေပိုင်း",
+            "🌙 ညပိုင်း",
+            "🔄 တစ်ခါတလေမှ နှေးပါတယ်",
+        ]
+
+        if raw not in time_options:
+            await send_reply(
+                message,
+                "အောက်က အချိန်ရွေးချယ်မှုတွေထဲက တစ်ခုကို ရွေးပေးပါခင်ဗျာ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["⏱️ အချိန်တိုင်း နှေးပါတယ်"],
+                        ["🌅 မနက်ပိုင်း"],
+                        ["☀️ နေ့လယ်ပိုင်း"],
+                        ["🌇 ညနေပိုင်း"],
+                        ["🌙 ညပိုင်း"],
+                        ["🔄 တစ်ခါတလေမှ နှေးပါတယ်"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["speed_time"] = raw
+        context.user_data["flow"] = "speed_customer_id"
+
+        await send_reply(
+            message,
+            """🆔 Customer ID ကို ပို့ပေးပါခင်ဗျာ။
+
+ဥပမာ — KAKMWD-1234567
+
+Customer ID မသိပါက “❓ မသိပါဘူး” ကို နှိပ်ပြီး ဆက်လုပ်နိုင်ပါတယ်။""",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["❓ မသိပါဘူး"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # CUSTOMER ID
+    if flow == "speed_customer_id":
+
+        customer_id = raw.strip().upper()
+
+        if "မသိ" in raw:
+            context.user_data["speed_customer_id"] = "မသိပါ"
+
+        elif (
+            customer_id.startswith("KAKMWD-")
+            and len(customer_id[7:]) == 7
+            and customer_id[7:].isdigit()
+        ):
+            context.user_data["speed_customer_id"] = customer_id
+
+        else:
+            await send_reply(
+                message,
+                "❌ Customer ID ပုံစံ မမှန်ပါခင်ဗျာ။\n\n"
+                "ဥပမာ — KAKMWD-1234567\n"
+                "မသိပါက “❓ မသိပါဘူး” ကို နှိပ်ပါ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [
                         ["❓ မသိပါဘူး"],
                         ["🔙 Main Menu"],
                     ],
@@ -1815,44 +1995,31 @@ Download / Upload Speed ကို ကြည့်ပေးပါ။
             )
             return
 
-        if "2" in text or "တစ်လုံး" in text:
+        context.user_data["flow"] = "speed_phone"
 
-            context.user_data["flow"] = "speed_single_device_result"
+        await send_reply(
+            message,
+            "📞 ဆက်သွယ်နိုင်မယ့် ဖုန်းနံပါတ်ကို ပို့ပေးပါခင်ဗျာ။\n\n"
+            "ဥပမာ — 09123456789",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
 
+    # PHONE NUMBER
+    if flow == "speed_phone":
+
+        phone = raw.strip()
+
+        if not re.fullmatch(r"09\d{7,9}", phone):
             await send_reply(
                 message,
-                """📱 Device တစ်လုံးတည်းမှာ Internet နှေးနေပါက—
-
-1️⃣ WiFi ကို Disconnect လုပ်ပါ။
-2️⃣ ပြန် Connect လုပ်ပါ။
-3️⃣ Internet Speed ပြန်စမ်းကြည့်ပါ။
-
-အခု Internet ပုံမှန်ပြန်ဖြစ်ပါသလား?
-""",
-                update,
-                ReplyKeyboardMarkup(
-                    [
-                        ["🟢 ရပါပြီ"],
-                        ["🔴 မရသေးပါဘူး"],
-                        ["🔙 Main Menu"],
-                    ],
-                    resize_keyboard=True,
-                ),
-            )
-            return
-
-        if "3" in text or "ညဘက်" in text:
-
-            context.user_data["flow"] = "speed_night"
-
-            await send_reply(
-                message,
-                """🌙 ညဘက်မှာ ပိုနှေးတယ်ဆိုရင်
-ဘယ်အချိန်လောက်မှာ စပြီး နှေးလာတတ်ပါသလဲခင်ဗျာ?
-
-ဥပမာ - 8:00 PM / 9:00 PM / 10:00 PM
-အချိန်ကို ပြောပေးပါ။
-""",
+                "❌ ဖုန်းနံပါတ်ပုံစံ မမှန်ပါ။\n"
+                "09 နဲ့စတဲ့ မြန်မာဖုန်းနံပါတ်ကို ပြန်ပို့ပေးပါ။\n"
+                "ဥပမာ — 09123456789",
                 update,
                 ReplyKeyboardMarkup(
                     [["🔙 Main Menu"]],
@@ -1861,36 +2028,107 @@ Download / Upload Speed ကို ကြည့်ပေးပါ။
             )
             return
 
-        if "4" in text or "အချိန်တိုင်း" in text:
+        context.user_data["speed_phone"] = phone
+        context.user_data["flow"] = "speed_details"
 
-            context.user_data["flow"] = "speed_test"
-            context.user_data["speed_type"] = "အချိန်တိုင်း Internet နှေးခြင်း"
+        await send_reply(
+            message,
+            """📝 Internet နှေးတဲ့ပြဿနာနဲ့ ပတ်သက်ပြီး
+ထပ်မံပြောပြချင်တာရှိပါက ရေးပို့ပေးနိုင်ပါတယ်။
 
-            await send_reply(
-                message,
-                """📈 အချိန်တိုင်း Internet နှေးနေပါက
-Speed Test ရလဒ်ကို စစ်ဆေးပေးပါမယ်။
+ဥပမာ — ဗီဒီယိုဖွင့်ရင် အမြဲ Buffering ဖြစ်တယ်။
 
-Download / Upload Speed ကို ပြန်ပို့ပေးပါ။
-မစစ်တတ်ပါက ❓ မသိပါဘူး ကို ရွေးပါ။
+ထပ်ဖြည့်စရာမရှိပါက “မရှိပါ” လို့ ပို့ပေးပါ။""",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["မရှိပါ"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # SUBMIT SPEED COMPLAINT TO ADMIN
+    if flow == "speed_details":
+
+        extra_details = (
+            "မရှိပါ"
+            if raw.strip() == "မရှိပါ"
+            else raw.strip()
+        )
+
+        user = update.effective_user
+
+        customer_id = context.user_data.get(
+            "speed_customer_id",
+            "မသိပါ",
+        )
+        phone = context.user_data.get(
+            "speed_phone",
+            "မရှိပါ",
+        )
+        apps = context.user_data.get(
+            "speed_apps",
+            [],
+        )
+        slow_time = context.user_data.get(
+            "speed_time",
+            "မသိပါ",
+        )
+
+        app_text = "\n".join(apps) if apps else "မသိပါ"
+
+        admin_report = f"""🐌 Internet နှေးခြင်း တိုင်ကြားချက်အသစ်
+
+👤 Telegram အမည်: {user.full_name}
+📱 Username: @{user.username or 'မရှိပါ'}
+🆔 Telegram ID: {user.id}
+
+🆔 Customer ID: {customer_id}
+📞 ဖုန်းနံပါတ်: {phone}
+
+📱 နှေးနေသော App / Service:
+{app_text}
+
+⏰ နှေးနေသောအချိန်:
+{slow_time}
+
+📝 ထပ်မံဖော်ပြချက်:
+{extra_details}
+
+⚠️ Support Team မှ လိုင်းအခြေအနေကို စစ်ဆေးပေးရန်။
+"""
+
+        await notify_admin(context, admin_report)
+
+        reset_flow(context)
+
+        await send_reply(
+            message,
+            """ဟုတ်ကဲ့ပါခင်ဗျာ။ 🙏
+
+လူကြီးမင်း ဖြေကြားပေးထားတဲ့ အချက်အလက်များအတွက် ကျေးဇူးတင်ပါတယ်။
+
+လူကြီးမင်းရဲ့ Internet အနှေးပြဿနာကို
+လိုင်းစစ်ဆေးရန် Support အဖွဲ့ထံ တင်ပြပေးလိုက်ပါပြီ။
+Support အဖွဲ့မှ စစ်ဆေးပေးပါမယ်နော်။
+
+📞 Customer Support — 09-777719577
+
+Internet လိုင်းနှေးခြင်း၊ လိုင်းမကောင်းခြင်းများ ဖြစ်ပေါ်နေပါက
+ရုံးချိန်အတွင်း မနက် ၉ နာရီမှ ည ၁၂ နာရီအထိ
+အချိန်မရွေး အထက်ပါဖုန်းနံပါတ်သို့ ဆက်သွယ်ပြီး
+လိုင်းအခြေအနေကို စစ်ဆေးမေးမြန်းနိုင်ပါတယ်။
+
+ကျေးဇူးတင်ပါတယ်။
+Ultra Net KAK WiFi Internet Service Provider
 """,
-                update,
-                ReplyKeyboardMarkup(
-                    [
-                        ["📸 Speed Test ရပြီးပါပြီ"],
-                        ["❓ မသိပါဘူး"],
-                        ["🔙 Main Menu"],
-                    ],
-                    resize_keyboard=True,
-                ),
-            )
-            return
-
-        if "5" in text or "app" in text or "website" in text:
-
-            await start_app_flow(message, update, context)
-            return
-
+            update,
+            menu(),
+        )
+        return
 
     # SPEED TEST: Option 1 and Option 4
     if flow == "speed_test":
@@ -3067,11 +3305,15 @@ Device + First Month ပါဝင်ပါသည်။
         "🌐 Website / App တစ်ခုတည်း မရ",
     ]
 
+    
     if raw in complaint_buttons:
-        context.user_data["pending_complaint"] = raw
-        await start_customer_id_flow(message, update, context)
+        if raw == "🐌 Internet နှေး":
+            context.user_data.pop("pending_complaint", None)
+            await start_speed_flow(message, update, context)
+        else:
+            context.user_data["pending_complaint"] = raw
+            await start_customer_id_flow(message, update, context)
         return
-
 
     # =====================================================
     # CURRENT INTERNET FLOW
