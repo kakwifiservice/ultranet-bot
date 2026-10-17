@@ -1642,27 +1642,75 @@ Support Team ထံ Report ပို့ပေးထားပါတယ်။
 
     if flow == "router_lights":
 
-        if "မနီ" in text:
+        if "မသိ" in text:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Router / ONU မီးအခြေအနေ",
+                "Customer သည် LOS မီးအခြေအနေကို မသိပါ။ "
+                "Router / ONU မီးများ ပုံမှန်ဖြစ်သော်လည်း Internet မရကြောင်း "
+                "Support Team မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
 
             reset_flow(context)
 
             await send_reply(
                 message,
-                """🟢 LOS မနီပါက Fiber Signal ဘက်က
-ပုံမှန်ဖြစ်နိုင်ပါတယ်။
+                """ရပါတယ်ခင်ဗျာ။ 🙏
 
-အခု WiFi / Device ဘက်ကို
-ဆက်စစ်ပေးပါခင်ဗျာ။
+Router / ONU မီးအခြေအနေကို
+အဝေးမှ သေချာမစစ်ဆေးနိုင်ပါက
+Support Team ထံ တင်ပြပေးထားပါတယ်။
 
-📶 WiFi ပြဿနာကို ရွေးပြီး
-ဆက်စစ်နိုင်ပါတယ်။
+📞 Customer Support
+09-777719577
 """,
                 update,
-                complaint_menu(),
+                menu(),
+            )
+            return
+
+        if "မနီ" in text:
+
+            await send_complaint_report(
+                update,
+                context,
+                "Router / ONU မီးပုံမှန်ဖြစ်သော်လည်း Internet မရခြင်း",
+                "Customer အဖြေအရ LOS မီး မနီပါ။ "
+                "Router / ONU မီးများ ပုံမှန်ဖြစ်သော်လည်း Internet မရပါ။ "
+                "Support Team မှ လိုင်းအခြေအနေ၊ WAN ချိတ်ဆက်မှုနှင့် "
+                "Internet Service အခြေအနေကို ဆက်လက်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """ဟုတ်ကဲ့ပါခင်ဗျာ။ 🙏
+
+Router / ONU မီးများ ပုံမှန်ဖြစ်ပြီး
+LOS မီးလည်း မနီပါဘူးဆိုပေမယ့်
+Internet မရသေးတဲ့ပြဿနာကို
+Support Team ထံ တင်ပြပေးထားပါတယ်။
+
+🛠️ Support Team မှ လိုင်းအခြေအနေကို
+ဆက်လက်စစ်ဆေးပေးပါမယ်။
+
+⚠️ Router / ONU ကို RESET မလုပ်ပါနဲ့။
+
+📞 Customer Support — 09-777719577
+
+ကျေးဇူးတင်ပါတယ်။
+Ultra Net KAK WiFi Internet Service Provider
+""",
+                update,
+                menu(),
             )
             return
 
         if "နီ" in text:
+
             await start_los_flow(message, update, context)
             return
 
