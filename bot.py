@@ -287,10 +287,10 @@ def menu():
             ["🆔 Customer ID စစ်မယ်", "👤 လူနဲ့ဆက်သွယ်မယ်"],
             ["📍 ရုံးတည်နေရာ / Location", "📱 Social Media"],
             ["📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်းပေးခြင်း"],
+            ["🔄 Internet လိုင်းရွှေ့ရန်"],
         ],
         resize_keyboard=True,
     )
-
 
 # =========================================================
 # COMPLAINT MENU
@@ -559,6 +559,395 @@ KAKMWD- နောက်မှာ ဂဏန်း 7 လုံး
         ),
     )
 
+# =========================================================
+# INTERNET RELOCATION START
+# =========================================================
+
+async def start_relocation_flow(message, update, context):
+
+    reset_flow(context)
+
+    context.user_data["flow"] = "relocate_current_address"
+
+    await send_reply(
+        message,
+        """🔄 Internet လိုင်း ရွှေ့ပြောင်းခြင်း
+
+ရပါတယ်ခင်ဗျာ။ 🙏
+
+အိမ်ပြောင်းပြီး Internet လိုင်းကို
+ပြောင်းမဲ့လိပ်စာဆီ ရွှေ့လိုပါက
+တစ်ပတ်ကြိုတင် စာရင်းပေးသွင်းပေးပါခင်ဗျာ။
+
+အရင်ဆုံး လက်ရှိအသုံးပြုနေတဲ့
+လိပ်စာကို ပို့ပေးပါ။
+""",
+        update,
+        ReplyKeyboardMarkup(
+            [["🔙 Main Menu"]],
+            resize_keyboard=True,
+        ),
+    )
+
+# =========================================================
+# INTERNET RELOCATION FLOW HANDLER
+# =========================================================
+
+async def handle_relocation_flow(message, update, context, raw):
+
+    flow = context.user_data.get("flow")
+    text = raw.strip()
+
+    if text == "🔙 Main Menu":
+        reset_flow(context)
+        await send_reply(
+            message,
+            "Main Menu သို့ ပြန်သွားပါပြီ။",
+            update,
+            menu(),
+        )
+        return
+
+    # -----------------------------------------------------
+    # CURRENT ADDRESS
+    # -----------------------------------------------------
+
+    if flow == "relocate_current_address":
+
+        if len(text) < 3:
+            await send_reply(
+                message,
+                "လက်ရှိအသုံးပြုနေတဲ့ လိပ်စာကို ပြန်ပို့ပေးပါခင်ဗျာ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["relocate_current_address"] = text
+        context.user_data["flow"] = "relocate_new_address"
+
+        await send_reply(
+            message,
+            """📍 လက်ရှိလိပ်စာ ရရှိပါပြီ။
+
+အခု ပြောင်းမဲ့ လိပ်စာကို
+ပို့ပေးပါခင်ဗျာ။
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # -----------------------------------------------------
+    # NEW ADDRESS
+    # -----------------------------------------------------
+
+    if flow == "relocate_new_address":
+
+        if len(text) < 3:
+            await send_reply(
+                message,
+                "ပြောင်းမဲ့ လိပ်စာကို ပြန်ပို့ပေးပါခင်ဗျာ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["relocate_new_address"] = text
+        context.user_data["flow"] = "relocate_customer_id"
+
+        await send_reply(
+            message,
+            """✅ ပြောင်းမဲ့ လိပ်စာ ရရှိပါပြီ။
+
+🆔 Customer ID ကို ပို့ပေးပါခင်ဗျာ။
+
+ဥပမာ —
+KAKMWD-1234567
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # -----------------------------------------------------
+    # CUSTOMER ID
+    # -----------------------------------------------------
+
+    if flow == "relocate_customer_id":
+
+        customer_id = text.upper().replace(" ", "")
+
+        if not re.fullmatch(r"KAKMWD-\d{7}", customer_id):
+
+            await send_reply(
+                message,
+                """❌ Customer ID ပုံစံ မမှန်သေးပါဘူး။
+
+KAKMWD- နဲ့စပြီး
+နောက်မှာ ဂဏန်း ၇ လုံး ပါရပါမယ်။
+
+ဥပမာ —
+KAKMWD-1234567
+""",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["relocate_customer_id"] = customer_id
+        context.user_data["flow"] = "relocate_phone1"
+
+        await send_reply(
+            message,
+            """✅ Customer ID ရရှိပါပြီ။
+
+📞 ဆက်သွယ်ရန် ဖုန်းနံပါတ်ကို
+ပို့ပေးပါခင်ဗျာ။
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # -----------------------------------------------------
+    # PHONE 1
+    # -----------------------------------------------------
+
+    if flow == "relocate_phone1":
+
+        phone = text.replace(" ", "").replace("-", "")
+
+        if not re.fullmatch(r"(09\d{7,9}|\+959\d{7,9})", phone):
+
+            await send_reply(
+                message,
+                """❌ ဖုန်းနံပါတ်ပုံစံ မမှန်သေးပါဘူး။
+
+ဥပမာ —
+09xxxxxxxxx
+
+ပြန်ပို့ပေးပါခင်ဗျာ။
+""",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["relocate_phone1"] = phone
+        context.user_data["flow"] = "relocate_phone2"
+
+        await send_reply(
+            message,
+            """✅ ဖုန်းနံပါတ် ရရှိပါပြီ။
+
+အခြားဆက်သွယ်ရန် ဖုန်းနံပါတ်
+တစ်ခုရှိသေးပါသလားခင်ဗျာ။
+
+ဖုန်းနံပါတ် ၂ ခုရှိပါက
+တစ်ခုကို ဆက်သွယ်မရတဲ့အခါ
+အခြားတစ်ခုကို ဆက်သွယ်နိုင်ပါတယ်။
+
+ဒုတိယဖုန်းနံပါတ်ကို ပို့ပါ။
+မရှိပါက “မရှိပါ” ကို နှိပ်ပါ။
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [["မရှိပါ"], ["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # -----------------------------------------------------
+    # PHONE 2
+    # -----------------------------------------------------
+
+    if flow == "relocate_phone2":
+
+        if text == "မရှိပါ":
+            context.user_data["relocate_phone2"] = "မရှိပါ"
+        else:
+            phone = text.replace(" ", "").replace("-", "")
+
+            if not re.fullmatch(r"(09\d{7,9}|\+959\d{7,9})", phone):
+
+                await send_reply(
+                    message,
+                    """❌ ဖုန်းနံပါတ်ပုံစံ မမှန်သေးပါဘူး။
+
+ဥပမာ —
+09xxxxxxxxx
+
+ဒုတိယဖုန်းနံပါတ်ကို ပြန်ပို့ပါ။
+မရှိပါက “မရှိပါ” ကို နှိပ်ပါ။
+""",
+                    update,
+                    ReplyKeyboardMarkup(
+                        [["မရှိပါ"], ["🔙 Main Menu"]],
+                        resize_keyboard=True,
+                    ),
+                )
+                return
+
+            context.user_data["relocate_phone2"] = phone
+
+        context.user_data["flow"] = "relocate_confirm"
+
+        summary = relocation_summary(context)
+
+        await send_reply(
+            message,
+            summary,
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["✅ အတည်ပြုမယ်"],
+                    ["🔄 ပြန်ပြင်မယ်"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # -----------------------------------------------------
+    # CONFIRM
+    # -----------------------------------------------------
+
+    if flow == "relocate_confirm":
+
+        if text == "🔄 ပြန်ပြင်မယ်":
+            await start_relocation_flow(message, update, context)
+            return
+
+        if text == "✅ အတည်ပြုမယ်":
+
+            summary = relocation_summary(context)
+
+            await notify_admin(
+                context,
+                "🔄 Internet လိုင်းရွှေ့ပြောင်းရန် "
+                "လျှောက်လွှာအသစ်\n\n"
+                f"{summary}"
+            )
+
+            reset_flow(context)
+
+            await send_reply(
+                message,
+                """✅ Internet လိုင်းရွှေ့ပြောင်းရန်
+စာရင်းပေးသွင်းမှုကို အတည်ပြုပြီးပါပြီ။
+
+နောက်တစ်နေ့မှာ Survey ဆင်းစစ်ဆေးပေးပါမယ်။
+
+📞 Customer Support
+09-777719577
+
+ကျေးဇူးတင်ပါတယ်ခင်ဗျာ။
+Ultra Net KAK WiFi Internet Service Provider
+""",
+                update,
+                menu(),
+            )
+            return
+
+        await send_reply(
+            message,
+            "အောက်ပါခလုတ်များထဲမှ တစ်ခုကို ရွေးချယ်ပေးပါခင်ဗျာ။",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["✅ အတည်ပြုမယ်"],
+                    ["🔄 ပြန်ပြင်မယ်"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+# =========================================================
+# INTERNET RELOCATION SUMMARY
+# =========================================================
+
+def relocation_summary(context):
+
+    return f"""🔄 Internet လိုင်းရွှေ့ပြောင်းရန် စာရင်း
+
+အောက်ပါအချက်အလက်များ မှန်/မမှန်
+စစ်ဆေးပေးပါခင်ဗျာ။
+
+🆔 Customer ID
+{context.user_data.get("relocate_customer_id", "-")}
+
+📍 လက်ရှိလိပ်စာ
+{context.user_data.get("relocate_current_address", "-")}
+
+📍 ပြောင်းမဲ့ လိပ်စာ
+{context.user_data.get("relocate_new_address", "-")}
+
+📞 ဖုန်းနံပါတ် (၁)
+{context.user_data.get("relocate_phone1", "-")}
+
+📞 ဖုန်းနံပါတ် (၂)
+{context.user_data.get("relocate_phone2", "မရှိပါ")}
+
+------------------------------
+
+📅 စာရင်းပေးပြီးနောက်
+နောက်တစ်နေ့မှာ Survey ဆင်းစစ်ဆေးပေးပါမယ်။
+တစ်ပတ်ကြိုတင် စာရင်းပေးသွင်းရပါမယ်။
+
+📦 ပြောင်းမဲ့ လိပ်စာမှာ
+Distribution Box ရှိ/မရှိ၊
+အသုံးပြုနိုင်တဲ့ Port ရှိ/မရှိ
+ဝန်ထမ်းမှ စစ်ဆေးပေးပါမယ်။
+
+Port ရှိပါက လိုင်းရွှေ့ပြောင်းနိုင်ပါတယ်။
+
+💰 လိုင်းရွှေ့ပြောင်းခ
+Level-1 — 30,000 Ks
+Level-2 — 50,000 Ks
+
+ဘယ် Level ဖြစ်မလဲဆိုတာကို
+Survey ဆင်းစစ်ဆေးတဲ့ ဝန်ထမ်းမှ
+အတည်ပြုပေးပါမယ်။
+
+🔌 Cable Fee
+100m အထိ — အခမဲ့
+100m ကျော်ပါက — 1m = 500 Ks
+
+------------------------------
+
+အချက်အလက်အားလုံး မှန်ကန်ပြီး
+လိုင်းရွှေ့ပြောင်းရန် သေချာပါက
+✅ အတည်ပြုမယ် ကို နှိပ်ပါ။
+
+ပြန်စတင်လိုပါက
+🔄 ပြန်ပြင်မယ် ကို နှိပ်ပါ။
+"""
 
 # =========================================================
 # NEW INSTALLATION START
@@ -3120,7 +3509,19 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ),
         )
         return
+    
+    # =====================================================
+    # INTERNET RELOCATION BUTTON
+    # =====================================================
 
+    if raw == "🔄 Internet လိုင်းရွှေ့ရန်":
+
+        await start_relocation_flow(
+            message,
+            update,
+            context,
+        )
+        return
 
     # =====================================================
     # NEW INSTALLATION BUTTON
@@ -3134,7 +3535,19 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context,
         )
         return
+    # =====================================================
+    # INTERNET RELOCATION ACTIVE FLOW
+    # =====================================================
 
+    if context.user_data.get("flow", "").startswith("relocate_"):
+
+        await handle_relocation_flow(
+            message,
+            update,
+            context,
+            raw,
+        )
+        return
     # =====================================================
     # INSTALLATION ACTIVE FLOW
     # =====================================================
