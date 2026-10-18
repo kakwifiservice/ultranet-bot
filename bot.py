@@ -1718,66 +1718,23 @@ Internet မရတာက—
             )
             return
 
-    if flow == "unknown_los":
+        
+        
+    if flow == "los":
 
-        if "နီ" in text and "မနီ" not in text:
-            await start_los_flow(message, update, context)
-            return
+        if "နီနေဆဲ" in text:
+            await send_complaint_report(
+                update,
+                context,
+                "LOS မီးနီနေဆဲ",
+                "Fiber Signal ပြဿနာ ဖြစ်နိုင်သည်။ Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
+            )
 
-        if "မနီ" in text:
-
-            context.user_data["flow"] = "all_or_one"
+            reset_flow(context)
 
             await send_reply(
                 message,
-                """ဟုတ်ကဲ့ခင်ဗျာ။ 🙏
-
-LOS မီးမနီပါက ဆက်စစ်ပေးပါမယ်။
-
-Internet မရတာက—
-
-📱 Device အားလုံးမှာ မရပါ
-📱 Device တစ်လုံးတည်းမှာ မရပါ
-
-ဘယ်အခြေအနေပါလဲ?
-""",
-                update,
-                ReplyKeyboardMarkup(
-                    [
-                        ["📱 Device အားလုံး မရပါ"],
-                        ["📱 Device တစ်လုံးတည်း မရပါ"],
-                        ["🔙 Main Menu"],
-                    ],
-                    resize_keyboard=True,
-                ),
-            )
-            return
-
-    if flow == "all_or_one":
-
-        if "တစ်လုံး" in text:
-            await start_single_device_flow(message, update, context)
-            return
-
-        if "အားလုံး" in text:
-            await start_router_flow(message, update, context)
-            return
-
-    
-if flow == "los":
-    if "နီနေဆဲ" in text:
-        await send_complaint_report(
-            update,
-            context,
-            "LOS မီးနီနေဆဲ",
-            "Fiber Signal ပြဿနာ ဖြစ်နိုင်သည်။ Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
-        )
-
-        reset_flow(context)
-
-        await send_reply(
-            message,
-            """🔴 LOS မီး ဆက်နီနေသေးပါက
+                """🔴 LOS မီး ဆက်နီနေသေးပါက
 Fiber Signal ပြဿနာ ဖြစ်နိုင်ပါတယ်။
 
 Support Team မှ စစ်ဆေးပေးရန်
@@ -1792,10 +1749,10 @@ Support Team မှ စစ်ဆေးပေးရန်
 
 👤 လူနဲ့ဆက်သွယ်မယ်
 """,
-            update,
-            menu(),
-        )
-        return
+                update,
+                menu(),
+            )
+            return
 
         if "ပျောက်" in text:
             context.user_data["flow"] = "los_recovered"
@@ -1829,12 +1786,16 @@ LOS မီးက ONU / Router ပေါ်မှာ
 
 မသေချာသေးပါက
 📞 Customer Support
-09-777719577 ကို ဆက်သွယ်နိုင်ပါတယ်။
+09-777719577
+
+လိုင်းခွဲနံပါတ် (1) Customer Service ကို
+ခေါ်ဆိုပေးပါခင်ဗျာ။ 🙏
 """,
                 update,
                 menu(),
             )
             return
+
 
     if flow == "los_recovered":
 
