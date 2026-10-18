@@ -468,11 +468,15 @@ KAKMWD- + ဂဏန်း 7 လုံး
 ဥပမာ —
 KAKMWD-1234567
 
-⚠️ အပေါ်က ID သည် နမူနာသာဖြစ်ပါတယ်။
+"""⚠️ အပေါ်က ID သည် နမူနာသာဖြစ်ပါတယ်။
 မိမိ၏ စက် ID အမှန်ကိုသာ ပို့ပေးပါ။
 
 မသိပါက
-📞 Customer Support ကို ဆက်သွယ်နိုင်ပါတယ်။
+📞 Customer Support
+09-777719577
+
+လိုင်းခွဲနံပါတ် (1) Customer Service ကို
+ခေါ်ဆိုပေးပါခင်ဗျာ။ 🙏
 """,
         update,
         ReplyKeyboardMarkup(
@@ -480,7 +484,6 @@ KAKMWD-1234567
             resize_keyboard=True,
         ),
     )
-
 
 # =========================================================
 # CUSTOMER ID CHECK
@@ -864,6 +867,10 @@ KAKMWD-1234567
 
 📞 Customer Support
 09-777719577
+
+အသေးစိတ် ဆက်သွယ်မေးမြန်းလိုပါက
+လိုင်းခွဲနံပါတ် (1) Customer Service ကို
+ခေါ်ဆိုပေးပါခင်ဗျာ။ 🙏
 
 ကျေးဇူးတင်ပါတယ်ခင်ဗျာ။
 Ultra Net KAK WiFi Internet Service Provider
@@ -1755,34 +1762,39 @@ Internet မရတာက—
             await start_router_flow(message, update, context)
             return
 
-    if flow == "los":
-        if "နီနေဆဲ" in text:
-            await send_complaint_report(
-                update,
-                context,
-                "LOS မီးနီနေဆဲ",
-                "Fiber Signal ပြဿနာ ဖြစ်နိုင်သည်။ Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
-            )
+    
+if flow == "los":
+    if "နီနေဆဲ" in text:
+        await send_complaint_report(
+            update,
+            context,
+            "LOS မီးနီနေဆဲ",
+            "Fiber Signal ပြဿနာ ဖြစ်နိုင်သည်။ Customer ကို Line 1 မှ ဆက်သွယ်စစ်ဆေးရန် လိုအပ်သည်။"
+        )
 
-            reset_flow(context)
+        reset_flow(context)
 
-            await send_reply(
-                message,
-                """🔴 LOS မီး ဆက်နီနေသေးပါက
+        await send_reply(
+            message,
+            """🔴 LOS မီး ဆက်နီနေသေးပါက
 Fiber Signal ပြဿနာ ဖြစ်နိုင်ပါတယ်။
 
 Support Team မှ စစ်ဆေးပေးရန်
 လိုအပ်နိုင်ပါတယ်ခင်ဗျာ။
 
-📞 Line 1 — Call Center / Customer Service
-📞 09-777719577
+📞 Customer Support
+09-777719577
+
+အသေးစိတ် ဆက်သွယ်မေးမြန်းလိုပါက
+လိုင်းခွဲနံပါတ် (1) Customer Service ကို
+ခေါ်ဆိုပေးပါခင်ဗျာ။ 🙏
 
 👤 လူနဲ့ဆက်သွယ်မယ်
 """,
-                update,
-                menu(),
-            )
-            return
+            update,
+            menu(),
+        )
+        return
 
         if "ပျောက်" in text:
             context.user_data["flow"] = "los_recovered"
