@@ -288,6 +288,7 @@ def menu():
             ["📍 ရုံးတည်နေရာ / Location", "📱 Social Media"],
             ["📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်းပေးခြင်း"],
             ["🔄 Internet လိုင်းရွှေ့ရန်"],
+            ["♻️ WiFi ပြန်လည်အသုံးပြုရန်"],
         ],
         resize_keyboard=True,
     )
@@ -3504,6 +3505,19 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context,
         )
         return
+    
+    # =====================================================
+    # WIFI RECONNECTION BUTTON
+    # =====================================================
+
+    if raw == "♻️ WiFi ပြန်လည်အသုံးပြုရန်":
+
+        await start_reconnection_flow(
+            message,
+            update,
+            context,
+        )
+        return
 
     # =====================================================
     # NEW INSTALLATION BUTTON
@@ -3517,6 +3531,21 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context,
         )
         return
+    
+    # =====================================================
+    # WIFI RECONNECTION ACTIVE FLOW
+    # =====================================================
+
+    if context.user_data.get("flow", "").startswith("reconnect_"):
+
+        await handle_reconnection_flow(
+            message,
+            update,
+            context,
+            raw,
+        )
+        return
+    
     # =====================================================
     # INTERNET RELOCATION ACTIVE FLOW
     # =====================================================
@@ -3973,6 +4002,307 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "မင်္ဂလာပါ။ Ultra Net KAK Customer Support ကို ဆက်သွယ်ရန် အောက်က Button ကို နှိပ်ပါ။",
         reply_markup=keyboard
     )
+
+# =====================================================
+# WIFI RECONNECTION START FLOW
+# =====================================================
+
+async def start_reconnection_flow(message, update, context):
+    reset_flow(context)
+
+    context.user_data["flow"] = "reconnect_duration"
+
+    await send_reply(
+        message,
+        "♻️ WiFi ပြန်လည်အသုံးပြုရန်\n\n"
+        "လိုင်းမသုံးဖြစ်တာ ဘယ်လောက်ကြာပြီလဲခင်ဗျာ?",
+        update,
+        reply_markup=ReplyKeyboardMarkup(
+            [
+                ["၁ လ", "၂ လ"],
+                ["၃ လ", "၄ လ"],
+                ["၅ လ", "၆ လနှင့်အထက်"],
+            ],
+            resize_keyboard=True,
+        ),
+    )
+
+# =====================================================
+# WIFI RECONNECTION HANDLE FLOW
+# =====================================================
+
+async def handle_reconnection_flow(message, update, context, raw):
+    flow = context.user_data.get("flow", "")
+
+    if flow == "reconnect_duration":
+        durations = {
+            "၁ လ": 1,
+            "၂ လ": 2,
+            "၃ လ": 3,
+            "၄ လ": 4,
+            "၅ လ": 5,
+            "၆ လနှင့်အထက်": 6,
+        }
+
+        if raw not in durations:
+            await send_reply(
+                message,
+                "အောက်ပါခလုတ်တွေထဲမှ ရွေးပေးပါခင်ဗျာ။",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [
+                        ["၁ လ", "၂ လ"],
+                        ["၃ လ", "၄ လ"],
+                        ["၅ လ", "၆ လနှင့်အထက်"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["reconnect_months"] = durations[raw]
+        context.user_data["flow"] = "reconnect_customer_id"
+
+        await send_reply(
+            message,
+            "🆔 Customer ID ရှိပါသလားခင်ဗျာ?",
+            update,
+            reply_markup=ReplyKeyboardMarkup(
+                [["ရှိပါတယ်", "မရှိတော့ပါ / မသိတော့ပါ"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    if flow == "reconnect_customer_id":
+        if raw == "ရှိပါတယ်":
+            context.user_data["flow"] = "reconnect_customer_id_input"
+
+            await send_reply(
+                message,
+                "Customer ID ကို ရိုက်ပေးပါခင်ဗျာ။\n"
+                "ဥပမာ — KAKMWD-1234567",
+                update,
+            )
+            return
+
+        if raw == "မရှိတော့ပါ / မသိတော့ပါ":
+            context.user_data["reconnect_customer_id"] = (
+                "မရှိတော့ပါ / မသိတော့ပါ"
+            )
+            context.user_data["flow"] = "reconnect_phone"
+
+            await send_reply(
+                message,
+                "📱 ဆက်သွယ်ရန် ဖုန်းနံပါတ်ကို ပေးပါခင်ဗျာ။",
+                update,
+            )
+            return
+
+        await send_reply(
+            message,
+            "Customer ID ရှိ/မရှိ ရွေးပေးပါခင်ဗျာ။",
+            update,
+            reply_markup=ReplyKeyboardMarkup(
+                [["ရှိပါတယ်", "မရှိတော့ပါ / မသိတော့ပါ"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    
+    
+    if flow == "reconnect_customer_id_input":
+        customer_id = raw.strip().upper()
+
+        if not customer_id.startswith("KAKMWD-"):
+            await send_reply(
+                message,
+                "Customer ID ပုံစံ မမှန်သေးပါခင်ဗျာ။\n"
+                "ဥပမာ — KAKMWD-1234567",
+                update,
+            )
+            return
+
+        suffix = customer_id.removeprefix("KAKMWD-")
+
+        if not suffix.isdigit() or len(suffix) != 7:
+            await send_reply(
+                message,
+                "Customer ID ပုံစံ မမှန်သေးပါခင်ဗျာ။\n"
+                "ဥပမာ — KAKMWD-1234567",
+                update,
+            )
+            return
+
+        context.user_data["reconnect_customer_id"] = customer_id
+        context.user_data["flow"] = "reconnect_phone"
+
+        await send_reply(
+            message,
+            "📱 ဆက်သွယ်ရန် ဖုန်းနံပါတ်ကို ပေးပါခင်ဗျာ။",
+            update,
+        )
+        return
+
+    if flow == "reconnect_phone":
+        if len(raw.strip()) < 7:
+            await send_reply(
+                message,
+                "ဖုန်းနံပါတ်ကို ပြန်စစ်ပြီး ပေးပါခင်ဗျာ။",
+                update,
+            )
+            return
+
+        context.user_data["reconnect_phone"] = raw.strip()
+        months = context.user_data.get("reconnect_months", 0)
+
+        if months <= 2:
+            context.user_data["flow"] = "reconnect_confirm"
+
+            await send_reply(
+                message,
+                "၆၀ ရက်အတွင်း ပြန်လည်အသုံးပြုရန် "
+                "ပုံမှန် WiFi လစဉ်ကြေး တစ်လစာ ပေးသွင်းရပါမယ်ခင်ဗျာ။\n\n"
+                "ပြန်လည်အသုံးပြုရန် အတည်ပြုပါသလား?",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [["✅ ပြန်သုံးမယ်"], ["❌ မလုပ်တော့ပါ"]],
+                    resize_keyboard=True,
+                ),
+            )
+        else:
+            context.user_data["flow"] = "reconnect_light"
+
+            await send_reply(
+                message,
+                "စက်ကို မီးဖွင့်ပြီး မီးအခြေအနေ စစ်ပေးပါခင်ဗျာ။\n\n"
+                "မီးသုံးလုံး ပုံမှန်လင်းနေပါသလား?",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [
+                        ["💡 မီးသုံးလုံး ပုံမှန်လင်းတယ်"],
+                        ["🔴 ပုံမှန်မလင်းဘူး / မီးနီနေတယ်"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+        return
+
+    if flow == "reconnect_light":
+        if raw == "💡 မီးသုံးလုံး ပုံမှန်လင်းတယ်":
+            context.user_data["reconnect_light_status"] = (
+                "မီးသုံးလုံး ပုံမှန်လင်းသည်"
+            )
+        elif raw == "🔴 ပုံမှန်မလင်းဘူး / မီးနီနေတယ်":
+            context.user_data["reconnect_light_status"] = (
+                "မီးပုံမှန်မလင်း / မီးနီနေသည်"
+            )
+        else:
+            await send_reply(
+                message,
+                "အောက်ပါခလုတ်နှစ်ခုထဲမှ ရွေးပေးပါခင်ဗျာ။",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [
+                        ["💡 မီးသုံးလုံး ပုံမှန်လင်းတယ်"],
+                        ["🔴 ပုံမှန်မလင်းဘူး / မီးနီနေတယ်"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["flow"] = "reconnect_confirm"
+
+        await send_reply(
+            message,
+            "ရက် ၆၀ ကျော်သွားသောကြောင့် WiFi ပြန်သုံးရန် "
+            "လစဉ်ကြေး ၃ လစာ ကြိုတင်ပေးသွင်းရပါမယ်ခင်ဗျာ။\n\n"
+            "ဒီ ၃ လစာဟာ အရင်မသုံးဖြစ်ခဲ့တဲ့ လတွေအတွက် မဟုတ်ပါဘူး။ "
+            "ဝန်ဆောင်မှု ပြန်စတင်တဲ့နေ့မှစပြီး ၃ လစာတွက်မှာဖြစ်ပါတယ်။\n\n"
+            "ပြန်လည်အသုံးပြုရန် အတည်ပြုပါသလား?",
+            update,
+            reply_markup=ReplyKeyboardMarkup(
+                [["✅ ပြန်သုံးမယ်"], ["❌ မလုပ်တော့ပါ"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    if flow == "reconnect_confirm":
+        if raw == "❌ မလုပ်တော့ပါ":
+            reset_flow(context)
+
+            for key in (
+                "reconnect_months",
+                "reconnect_customer_id",
+                "reconnect_phone",
+                "reconnect_light_status",
+            ):
+                context.user_data.pop(key, None)
+
+            await send_reply(
+                message,
+                "စာရင်းတင်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီခင်ဗျာ။",
+                update,
+                reply_markup=menu(),
+            )
+            return
+
+        if raw != "✅ ပြန်သုံးမယ်":
+            await send_reply(
+                message,
+                "ပြန်သုံးရန် အတည်ပြုပါက "
+                "✅ ပြန်သုံးမယ် ကိုနှိပ်ပေးပါခင်ဗျာ။",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [["✅ ပြန်သုံးမယ်"], ["❌ မလုပ်တော့ပါ"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        months = context.user_data.get("reconnect_months", 0)
+        duration = "၆ လနှင့်အထက်" if months >= 6 else f"{months} လ"
+
+        admin_text = (
+            "♻️ WiFi ပြန်လည်အသုံးပြုရန် စာရင်းအသစ်\n\n"
+            f"🆔 Customer ID: {context.user_data.get('reconnect_customer_id', 'မသိရသေးပါ')}\n"
+            f"📱 ဖုန်းနံပါတ်: {context.user_data.get('reconnect_phone', 'မသိရသေးပါ')}\n"
+            f"📅 မသုံးဖြစ်သည့်ကာလ: {duration}\n"
+            f"💡 မီးအခြေအနေ: {context.user_data.get('reconnect_light_status', 'မစစ်ဆေးရသေးပါ')}\n"
+            f"💰 သတ်မှတ်ချက်: {'ပုံမှန်တစ်လစာ' if months <= 2 else '၃ လစာ ကြိုတင်ပေးသွင်းရန်'}\n"
+            "✅ ပြန်သုံးရန် အတည်ပြုပြီးပါပြီ။"
+        )
+
+        try:
+            await notify_admin(context, admin_text)
+        except Exception:
+            pass
+
+        reset_flow(context)
+
+        for key in (
+            "reconnect_months",
+            "reconnect_customer_id",
+            "reconnect_phone",
+            "reconnect_light_status",
+        ):
+            context.user_data.pop(key, None)
+
+        await send_reply(
+            message,
+            "🙏 ကျေးဇူးတင်ပါတယ်ခင်ဗျာ။\n\n"
+            "📋 WiFi ပြန်လည်အသုံးပြုရန် စာရင်းကို လက်ခံရရှိပါပြီ။\n\n"
+            "Customer Support Team မှ စစ်ဆေးပြီး ဆက်သွယ်ပေးပါမယ်။\n\n"
+            "📞 Customer Support — 09-777719577\n\n"
+            "☎️ လူကိုယ်တိုင် စာရင်းတင်လိုပါက "
+            "လိုင်းခွဲနံပါတ် (1) — Customer Service ကို ခေါ်ဆိုနိုင်ပါတယ်။ 🙏",
+            update,
+            reply_markup=menu(),
+        )
+        return
 
 # RUN BOT
 # =========================================================
