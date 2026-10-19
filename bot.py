@@ -1269,6 +1269,7 @@ async def handle_installation_flow(
         )
         return
 
+    
     # -----------------------------------------------------
     # CONFIRM
     # -----------------------------------------------------
@@ -1279,9 +1280,11 @@ async def handle_installation_flow(
 
             summary = installation_summary(context)
 
-            await notify_admin( context, f"📝 လိုင်းသစ်တပ်ဆင်ရန် လျှောက်လွှာအသစ်\n\n{summary}" 
+            await notify_admin(
+                context,
+                f"📝 လိုင်းသစ်တပ်ဆင်ရန် လျှောက်လွှာအသစ်\n\n{summary}"
             )
-            
+
             reset_flow(context)
 
             await send_reply(
@@ -1295,6 +1298,12 @@ async def handle_installation_flow(
 
 📞 Customer Support
 09-777719577
+
+လိုင်းသစ်တပ်ဆင်ရန် အသေးစိတ်
+ဆက်သွယ်မေးမြန်းလိုပါက
+လိုင်းခွဲနံပါတ် (1) Customer Service နှင့်
+လိုင်းခွဲနံပါတ် (3) New Installation တို့ကို
+ခေါ်ဆိုပြီးလည်း စာရင်းပေးသွင်းနိုင်ပါတယ်ခင်ဗျာ။ 🙏
 
 ဒီစာရင်းကို Support Team မှ
 ဆက်လက်စစ်ဆေးဆောင်ရွက်ပေးပါမယ်။
@@ -1322,7 +1331,6 @@ async def handle_installation_flow(
             installation_confirm_menu(),
         )
         return
-
 
 # =========================================================
 # INTERNET PROBLEM MENU
