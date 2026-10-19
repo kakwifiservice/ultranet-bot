@@ -3213,6 +3213,61 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     raw = message.text.strip()
     text = normalize(raw)
+    
+    # =====================================================
+    # CUSTOMER WELCOME MESSAGE
+    # =====================================================
+
+    greeting_words = {
+        "hi",
+        "hello",
+        "hey",
+        "မင်္ဂလာပါ",
+        "ဟယ်လို",
+        "မေးချင်လို့ပါ",
+    }
+
+    if text.casefold() in greeting_words:
+        welcome_text = """🙏 မင်္ဂလာပါခင်ဗျာ။ Ultra Net KAK Customer Support မှ ကြိုဆိုပါတယ်။
+
+📌 Bot ကို ဘယ်လိုအသုံးပြုရမလဲ?
+
+အဆင့် (၁) — Telegram Chat ရဲ့ အောက်ခြေမှာရှိတဲ့ Menu ခလုတ်ကို ရှာပြီး နှိပ်ပါ။
+
+အဆင့် (၂) — Menu ထဲမှာ အောက်ပါဝန်ဆောင်မှုများကို တွေ့ရပါမယ်။
+
+1. 📦 Package / Price — အင်တာနက် Package နှင့် ဈေးနှုန်းများ
+2. 🛠 Internet Problem — အင်တာနက်ပြဿနာ တင်ပြရန်
+3. 💳 Payment — ငွေပေးချေမှုဆိုင်ရာ အချက်အလက်များ
+4. 📞 Customer Support — Customer Support အချက်အလက်များ
+5. 🪪 Customer ID — Customer ID စစ်ဆေးရန်
+6. 👨‍💻 လူနဲ့ဆက်သွယ်မယ် — ဝန်ထမ်းနှင့် ဆက်သွယ်ရန်
+7. 📍 ရုံးတည်နေရာ (Location) — ရုံးတည်နေရာ ကြည့်ရန်
+8. 🌐 Social Media — လူမှုကွန်ရက်များ ကြည့်ရန်
+9. 📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်းပေးခြင်း
+10. 🔄 Internet လိုင်းရွှေ့ရန်
+11. ♻️ WiFi ပြန်လည်အသုံးပြုရန်
+
+အဆင့် (၃) — အင်တာနက်ပြဿနာများ မေးမြန်းလိုပါက Internet Problem ကို ရွေးချယ်ပါ။
+
+ဥပမာ —
+🔴 LOS မီးနီနေခြင်း
+📶 Internet လုံးဝမရခြင်း
+🐢 Internet နှေးခြင်း
+🔌 Internet ခဏခဏပြတ်ခြင်း
+📡 WiFi ပြဿနာများ
+🔑 WiFi Password ပြောင်းလဲခြင်း
+
+အဆင်မပြေပါက လူနဲ့ဆက်သွယ်မယ် ကို ရွေးချယ်ပြီး ဝန်ထမ်းထံ ဆက်သွယ်နိုင်ပါတယ်ခင်ဗျာ။
+
+📞 Customer Support — 09-777719577
+
+☎️ လူကိုယ်တိုင် ဆက်သွယ်လိုပါက လိုင်းခွဲနံပါတ် (1) — Customer Service ကို ခေါ်ဆိုဆက်သွယ်နိုင်ပါတယ်ခင်ဗျာ။ 🙏
+
+🙏 Ultra Net KAK ကို အသုံးပြုပေးတဲ့အတွက် ကျေးဇူးအထူးတင်ပါတယ်။"""
+
+        await send_reply(message, welcome_text, update)
+        return
 
     # =====================================================
     # MAIN MENU
