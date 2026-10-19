@@ -4194,10 +4194,50 @@ async def handle_reconnection_flow(message, update, context, raw):
             context.user_data["reconnect_light_status"] = (
                 "မီးသုံးလုံး ပုံမှန်လင်းသည်"
             )
+
+            context.user_data["flow"] = "reconnect_confirm"
+
+            await send_reply(
+                message,
+                "ရက် ၆၀ ကျော်သွားသောကြောင့် WiFi ပြန်သုံးရန် "
+                "လစဉ်ကြေး ၃ လစာ ကြိုတင်ပေးသွင်းရပါမယ်ခင်ဗျာ။\n\n"
+                "ဒီ ၃ လစာဟာ အရင်မသုံးဖြစ်ခဲ့တဲ့ လတွေအတွက် မဟုတ်ပါဘူး။ "
+                "ဝန်ဆောင်မှု ပြန်စတင်တဲ့နေ့မှစပြီး ၃ လစာတွက်မှာဖြစ်ပါတယ်။\n\n"
+                "ပြန်လည်အသုံးပြုရန် အတည်ပြုပါသလား?",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [["✅ ပြန်သုံးမယ်"], ["❌ မလုပ်တော့ပါ"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
         elif raw == "🔴 ပုံမှန်မလင်းဘူး / မီးနီနေတယ်":
             context.user_data["reconnect_light_status"] = (
                 "မီးပုံမှန်မလင်း / မီးနီနေသည်"
             )
+
+            context.user_data["flow"] = "reconnect_confirm"
+
+            await send_reply(
+                message,
+                "🔧 ONU / Router မီးပုံမှန်မလင်းဘူး၊ မီးနီနေတယ်ဆိုရင် "
+                "ရုံးဘက်မှ ဆားဗစ်ဝန်ထမ်း လွှတ်ပေးဖို့ လိုအပ်ပါတယ်ခင်ဗျာ။\n\n"
+                "💰 WiFi ပြန်သုံးရန် ရက် ၆၀ ကျော်သွားသောကြောင့် "
+                "လစဉ်ကြေး ၃ လစာ ကြိုတင်ပေးသွင်းရပါမယ်။\n\n"
+                "ဒီ ၃ လစာဟာ အရင်မသုံးဖြစ်ခဲ့တဲ့ လတွေအတွက် မဟုတ်ပါဘူး။ "
+                "ဝန်ဆောင်မှု ပြန်စတင်တဲ့နေ့မှစပြီး ၃ လစာတွက်မှာဖြစ်ပါတယ်။\n\n"
+                "လစဉ်ကြေးကို ဆားဗစ်ဝန်ထမ်းထံမှာလည်း "
+                "ပေးသွင်းနိုင်ပါတယ်ခင်ဗျာ။\n\n"
+                "ပြန်လည်အသုံးပြုရန် အတည်ပြုပါသလား?",
+                update,
+                reply_markup=ReplyKeyboardMarkup(
+                    [["✅ ပြန်သုံးမယ်"], ["❌ မလုပ်တော့ပါ"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
         else:
             await send_reply(
                 message,
@@ -4212,23 +4252,6 @@ async def handle_reconnection_flow(message, update, context, raw):
                 ),
             )
             return
-
-        context.user_data["flow"] = "reconnect_confirm"
-
-        await send_reply(
-            message,
-            "ရက် ၆၀ ကျော်သွားသောကြောင့် WiFi ပြန်သုံးရန် "
-            "လစဉ်ကြေး ၃ လစာ ကြိုတင်ပေးသွင်းရပါမယ်ခင်ဗျာ။\n\n"
-            "ဒီ ၃ လစာဟာ အရင်မသုံးဖြစ်ခဲ့တဲ့ လတွေအတွက် မဟုတ်ပါဘူး။ "
-            "ဝန်ဆောင်မှု ပြန်စတင်တဲ့နေ့မှစပြီး ၃ လစာတွက်မှာဖြစ်ပါတယ်။\n\n"
-            "ပြန်လည်အသုံးပြုရန် အတည်ပြုပါသလား?",
-            update,
-            reply_markup=ReplyKeyboardMarkup(
-                [["✅ ပြန်သုံးမယ်"], ["❌ မလုပ်တော့ပါ"]],
-                resize_keyboard=True,
-            ),
-        )
-        return
 
     if flow == "reconnect_confirm":
         if raw == "❌ မလုပ်တော့ပါ":
