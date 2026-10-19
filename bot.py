@@ -3264,7 +3264,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 ☎️ လူကိုယ်တိုင် ဆက်သွယ်လိုပါက လိုင်းခွဲနံပါတ် (1) — Customer Service ကို ခေါ်ဆိုဆက်သွယ်နိုင်ပါတယ်ခင်ဗျာ။ 🙏
 
-🙏 Ultra Net KAK ကို အသုံးပြုပေးတဲ့အတွက် ကျေးဇူးအထူးတင်ပါတယ်။"""
+🙏 **Ultra Net- Ko Aye Ko - WiFi ကို အသုံးပြုပေးတဲ့အတွက် ကျေးဇူးအထူးတင်ပါတယ်။**
 
         await send_reply(message, welcome_text, update)
         return
