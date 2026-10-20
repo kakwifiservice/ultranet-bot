@@ -3245,7 +3245,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 7. 📍 ရုံးတည်နေရာ (Location) — ရုံးတည်နေရာ ကြည့်ရန်
 8. 🌐 Social Media — လူမှုကွန်ရက်များ ကြည့်ရန်
 9. 📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်းပေးခြင်း
-10. 🔄 Internet လိုင်းရွှေ့ရန်
+10. 📍 WiFi နေရာပြောင်း
 11. ♻️ WiFi ပြန်လည်အသုံးပြုရန်
 
 အဆင့် (၃) — အင်တာနက်ပြဿနာများ မေးမြန်းလိုပါက Internet Problem ကို ရွေးချယ်ပါ။
@@ -4165,8 +4165,6 @@ async def handle_reconnection_flow(message, update, context, raw):
         )
         return
 
-    
-    
     if flow == "reconnect_customer_id_input":
         customer_id = raw.strip().upper()
 
