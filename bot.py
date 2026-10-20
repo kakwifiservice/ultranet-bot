@@ -462,6 +462,7 @@ def package_text(speed):
 {CABLE_TEXT}
 
 {INSTALL_TEXT}
+"""
 
 # =========================================================
 # CUSTOMER ID START
