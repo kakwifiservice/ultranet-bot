@@ -980,7 +980,14 @@ Survey ဆင်းစစ်ဆေးတဲ့ ဝန်ထမ်းမှ
 
 async def start_installation_flow(message, update, context):
 
+    # Keep the package selected by the customer
+    selected_package = context.user_data.get("install_package")
+
     reset_flow(context)
+
+    # Restore the selected package after resetting other flow data
+    if selected_package:
+        context.user_data["install_package"] = selected_package
 
     context.user_data["flow"] = "install_name"
 
@@ -999,7 +1006,6 @@ async def start_installation_flow(message, update, context):
             resize_keyboard=True,
         ),
     )
-
 
 # =========================================================
 # INSTALLATION SUMMARY
@@ -1067,7 +1073,169 @@ async def handle_installation_flow(
 ):
 
     flow = context.user_data.get("flow")
+    # -----------------------------------------------------
+    # DEVICE COUNT
+    # -----------------------------------------------------
 
+    if flow == "install_device_count":
+
+        try:
+            device_count = int(raw.strip())
+        except ValueError:
+            device_count = 0
+
+        if device_count < 1:
+
+            await send_reply(
+                message,
+                """❌ ဖုန်းအရေအတွက်ကို ဂဏန်းဖြင့်
+မှန်ကန်စွာ ပြန်ပို့ပေးပါခင်ဗျာ။
+
+ဥပမာ — 4 / 8 / 12 / 18 / 25
+""",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["install_device_count"] = device_count
+
+        if device_count <= 4:
+            recommended = "15"
+        elif device_count <= 8:
+            recommended = "25"
+        elif device_count <= 12:
+            recommended = "35"
+        elif device_count <= 18:
+            recommended = "50"
+        elif device_count <= 25:
+            recommended = "70"
+        else:
+            recommended = "70"
+
+        context.user_data["install_recommended_package"] = recommended
+        context.user_data["flow"] = "install_package_type"
+
+        package_names = {
+            "15": "15 Mbps Home",
+            "25": "25 Mbps Home",
+            "35": "35 Mbps Home",
+            "50": "50 Mbps Business",
+            "70": "70 Mbps Business",
+        }
+
+        extra_note = ""
+
+        if device_count > 25:
+            extra_note = """
+
+⚠️ ဖုန်း ၂၅ လုံးထက်ပို၍ အသုံးပြုနိုင်သော်လည်း
+တစ်ချိန်တည်း အသုံးပြုသူများလာပါက
+Internet နှေးခြင်းနှင့် Connection မတည်ငြိမ်ခြင်း
+ဖြစ်နိုင်ပါတယ်။
+"""
+
+        await send_reply(
+            message,
+            f"""📱 အသုံးပြုမည့်ဖုန်း — {device_count} လုံး
+
+📦 အကြံပြု Package
+{package_names[recommended]}
+
+အောက်ပါအတိုင်း Package အမျိုးအစားကို
+ရွေးချယ်ပေးပါခင်ဗျာ။
+{extra_note}
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [
+                    ["🏠 Home"],
+                    ["🏢 Business"],
+                    ["🔙 Main Menu"],
+                ],
+                resize_keyboard=True,
+            ),
+        )
+        return
+        
+    # -----------------------------------------------------
+    # PACKAGE TYPE SELECTION
+    # -----------------------------------------------------
+
+    if flow == "install_package_type":
+
+        device_count = context.user_data.get(
+            "install_device_count", 1
+        )
+
+        if raw == "🏠 Home":
+
+            if device_count <= 4:
+                speed = "15"
+            elif device_count <= 8:
+                speed = "25"
+            else:
+                speed = "35"
+
+        elif raw == "🏢 Business":
+
+            if device_count <= 18:
+                speed = "50"
+            else:
+                speed = "70"
+
+        else:
+
+            await send_reply(
+                message,
+                """အောက်ပါခလုတ်များထဲမှ
+တစ်ခုကို ရွေးချယ်ပေးပါခင်ဗျာ။""",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["🏠 Home"],
+                        ["🏢 Business"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        kind, speed_text, device_fee, monthly_fee, total = (
+            PACKAGES[speed]
+        )
+
+        context.user_data["install_package"] = (
+            f"{speed_text} {kind}"
+        )
+
+        await send_reply(
+            message,
+            f"""✅ Package ရွေးချယ်ပြီးပါပြီ။
+
+📦 {speed_text} {kind}
+
+🔹 စက်တန်ဖိုး — {device_fee:,} Ks
+🔹 ပထမလ လစဉ်ကြေး — {monthly_fee:,} Ks
+🔹 စတင်တပ်ဆင်ခ — {total:,} Ks
+
+ယခု လိုင်းသစ်တပ်ဆင်ရန်
+စာရင်းပေးသွင်းမှုကို ဆက်လက်လုပ်ဆောင်ပါမယ်။
+""",
+            update,
+            menu(),
+        )
+
+        await start_installation_flow(
+            message,
+            update,
+            context,
+        )
+        return    
     # -----------------------------------------------------
     # NAME
     # -----------------------------------------------------
@@ -3596,10 +3764,27 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if raw == "📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်းပေးခြင်း":
 
-        await start_installation_flow(
+        reset_flow(context)
+
+        context.user_data["flow"] = "install_device_count"
+
+        await send_reply(
             message,
+            """📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်းပေးခြင်း
+
+📱 အင်တာနက် အသုံးပြုမည့်
+ဖုန်းအရေအတွက် ဘယ်နှစ်လုံးရှိပါသလဲခင်ဗျာ။
+
+ဥပမာ — 4 / 8 / 12 / 18 / 25
+
+အသုံးပြုမည့် ဖုန်းအရေအတွက်ကို
+ဂဏန်းဖြင့် ပြန်ပို့ပေးပါခင်ဗျာ။
+""",
             update,
-            context,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
         )
         return
     
