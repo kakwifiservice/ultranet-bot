@@ -1011,12 +1011,9 @@ async def start_installation_flow(message, update, context):
 # INSTALLATION SUMMARY
 # =========================================================
 
-def installation_summary(context):
+def installation_summary(context, customer=True):
 
-    return f"""📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်း
-
-အောက်ပါအချက်အလက်များ မှန်/မမှန်
-စစ်ဆေးပေးပါခင်ဗျာ။
+    summary = f"""📝 လိုင်းသစ်တပ်ဆင်ရန် စာရင်း
 
 👤 အမည်
 {context.user_data.get("install_name", "-")}
@@ -1050,7 +1047,10 @@ Survey ပြီးနောက် ၃ ရက်အတွင်း
 တိုင်းတာရန် မလိုပါ။
 Survey ဆင်းစစ်ဆေးသည့်အချိန်
 ဝန်ထမ်းဘက်မှ တိုင်းတာပေးပါမယ်။
+"""
 
+    if customer:
+        summary += """
 ------------------------------
 
 အားလုံးမှန်ကန်ပါက
@@ -1060,6 +1060,7 @@ Survey ဆင်းစစ်ဆေးသည့်အချိန်
 🔄 ပြန်ပြင်မယ် ကို နှိပ်ပါ။
 """
 
+    return summary
 
 # =========================================================
 # INSTALLATION FLOW HANDLER
@@ -1532,7 +1533,7 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 
         if raw == "✅ အတည်ပြုမယ်":
 
-            summary = installation_summary(context)
+            summary = installation_summary(context, customer=False)
 
             # ADMIN REPORT
             await notify_admin(
