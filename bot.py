@@ -1146,49 +1146,55 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 
     if flow == "install_package_type":
 
-        device_count = context.user_data.get(
-            "install_device_count", 1
-        )
-
         if raw == "🏠 Home":
 
-            if device_count <= 4:
-                speed = "15"
-            elif device_count <= 8:
-                speed = "25"
-            elif device_count <= 12:
-                speed = "35"
-            else:
-                await send_reply(
-                    message,
-                    """❌ Home Package သည်
-ဖုန်း ၁၂ လုံးအထိအတွက် အကြံပြုထားပါတယ်။
+            context.user_data["flow"] = "install_home_speed"
 
-ဖုန်းအရေအတွက်အလိုက် Business ကို
+            await send_reply(
+                message,
+                """🏠 Home Package ရွေးချယ်ခြင်း
+
+အသုံးပြုလိုသည့် Internet Speed ကို
 ရွေးချယ်ပေးပါခင်ဗျာ။""",
-                    update,
-                    ReplyKeyboardMarkup(
-                        [
-                            ["🏠 Home"],
-                            ["🏢 Business"],
-                            ["🔙 Main Menu"],
-                        ],
-                        resize_keyboard=True,
-                    ),
-                )
-                return
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["15 Mbps"],
+                        ["25 Mbps"],
+                        ["35 Mbps"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
 
         elif raw == "🏢 Business":
 
-            if device_count <= 18:
-                speed = "50"
-            else:
-                speed = "70"
+            context.user_data["flow"] = "install_business_speed"
+
+            await send_reply(
+                message,
+                """🏢 Business Package ရွေးချယ်ခြင်း
+
+အသုံးပြုလိုသည့် Internet Speed ကို
+ရွေးချယ်ပေးပါခင်ဗျာ။""",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["50 Mbps"],
+                        ["70 Mbps"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
 
         else:
             await send_reply(
                 message,
-                "အောက်ပါခလုတ်များထဲမှ တစ်ခုကို ရွေးချယ်ပါခင်ဗျာ။",
+                "Home သို့မဟုတ် Business ကို ရွေးချယ်ပေးပါခင်ဗျာ။",
                 update,
                 ReplyKeyboardMarkup(
                     [
@@ -1201,17 +1207,86 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
             )
             return
 
-        kind, speed_text, device_fee, monthly_fee, total = (
-            PACKAGES[speed]
-        )
+    # -----------------------------------------------------
+    # HOME SPEED SELECTION
+    # -----------------------------------------------------
 
-        context.user_data["install_package"] = (
-            f"{speed_text} {kind}"
-        )
+    if flow == "install_home_speed":
 
-        await send_reply(
-            message,
-            f"""✅ Package ရွေးချယ်ပြီးပါပြီ။
+        home_packages = {
+            "15 Mbps": "15",
+            "25 Mbps": "25",
+            "35 Mbps": "35",
+        }
+
+        if raw not in home_packages:
+
+            await send_reply(
+                message,
+                "15 Mbps၊ 25 Mbps သို့မဟုတ် 35 Mbps ကို ရွေးချယ်ပါခင်ဗျာ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["15 Mbps"],
+                        ["25 Mbps"],
+                        ["35 Mbps"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        speed = home_packages[raw]
+
+    # -----------------------------------------------------
+    # BUSINESS SPEED SELECTION
+    # -----------------------------------------------------
+
+    elif flow == "install_business_speed":
+
+        business_packages = {
+            "50 Mbps": "50",
+            "70 Mbps": "70",
+        }
+
+        if raw not in business_packages:
+
+            await send_reply(
+                message,
+                "50 Mbps သို့မဟုတ် 70 Mbps ကို ရွေးချယ်ပါခင်ဗျာ။",
+                update,
+                ReplyKeyboardMarkup(
+                    [
+                        ["50 Mbps"],
+                        ["70 Mbps"],
+                        ["🔙 Main Menu"],
+                    ],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        speed = business_packages[raw]
+
+    else:
+        return
+
+    # -----------------------------------------------------
+    # PACKAGE PRICE CONFIRMATION
+    # -----------------------------------------------------
+
+    kind, speed_text, device_fee, monthly_fee, total = (
+        PACKAGES[speed]
+    )
+
+    context.user_data["install_package"] = (
+        f"{speed_text} {kind}"
+    )
+
+    await send_reply(
+        message,
+        f"""✅ Package ရွေးချယ်ပြီးပါပြီ။
 
 📦 {speed_text} {kind}
 
@@ -1222,15 +1297,16 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 ယခု လိုင်းသစ်တပ်ဆင်ရန်
 စာရင်းပေးသွင်းမှုကို ဆက်လက်လုပ်ဆောင်ပါမယ်။
 """,
-            update,
-        )
+        update,
+    )
 
-        await start_installation_flow(
-            message,
-            update,
-            context,
-        )
-        return    
+    await start_installation_flow(
+        message,
+        update,
+        context,
+    )
+    return
+    
     # -----------------------------------------------------
     # NAME
     # -----------------------------------------------------
