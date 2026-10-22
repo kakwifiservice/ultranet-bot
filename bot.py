@@ -1131,8 +1131,8 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
             update,
             ReplyKeyboardMarkup(
                 [
-                    ["🏠 Home"],
-                    ["🏢 Business"],
+                    ["🏠 အိမ်သုံး"],
+                    ["🏢 လုပ်ငန်းသုံး"],
                     ["🔙 Main Menu"],
                 ],
                 resize_keyboard=True,
@@ -1146,7 +1146,7 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 
     if flow == "install_package_type":
 
-        if raw == "🏠 Home":
+        if raw == "🏠 အိမ်သုံး":
 
             context.user_data["flow"] = "install_home_speed"
 
@@ -1169,7 +1169,7 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
             )
             return
 
-        elif raw == "🏢 Business":
+        elif raw == "🏢 လုပ်ငန်းသုံး":
 
             context.user_data["flow"] = "install_business_speed"
 
