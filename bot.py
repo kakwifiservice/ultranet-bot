@@ -1525,6 +1525,7 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
         )
         return
 
+    
     # -----------------------------------------------------
     # CONFIRM
     # -----------------------------------------------------
@@ -1533,15 +1534,26 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 
         if raw == "✅ အတည်ပြုမယ်":
 
-            summary = installation_summary(context, customer=False)
+            # ADMIN REPORT - SHORT VERSION
+            admin_report = f"""📝 လိုင်းသစ်တပ်ဆင်ရန် လျှောက်လွှာအသစ်
 
-            # ADMIN REPORT
-            await notify_admin(
-                context,
-                f"""📝 လိုင်းသစ်တပ်ဆင်ရန် လျှောက်လွှာအသစ်
+👤 အမည်
+{context.user_data.get("install_name", "-")}
 
-{summary}"""
-            )
+📞 ဖုန်းနံပါတ်
+{context.user_data.get("install_phone", "-")}
+
+📍 တပ်ဆင်မည့်နေရာ
+{context.user_data.get("install_address", "-")}
+
+📦 Package
+{context.user_data.get("install_package", "-")}
+
+📝 အခြားမှတ်ချက်
+{context.user_data.get("install_note", "-")}
+"""
+
+            await notify_admin(context, admin_report)
 
             # RESET CUSTOMER FLOW
             reset_flow(context)
@@ -1567,7 +1579,7 @@ Survey ပြီးနောက် ၃ ရက်အတွင်း
 လိုင်းသစ်တပ်ဆင်ရန် အသေးစိတ်
 ဆက်သွယ်မေးမြန်းလိုပါက
 လိုင်းခွဲနံပါတ် (1) Customer Service (ဝန်ဆောင်မှု) နှင့်
-လိုင်းခွဲနံပါတ် (3) New Installaion (လိုင်းသစ်တပ်ဆင်ခြင်း)တို့ကို
+လိုင်းခွဲနံပါတ် (3) New Installation (လိုင်းသစ်တပ်ဆင်ခြင်း) တို့ကို
 ခေါ်ဆိုပြီးလည်း စာရင်းပေးသွင်းနိုင်ပါတယ်ခင်ဗျာ။ 🙏
 
 ဒီစာရင်းကို Support Team မှ
