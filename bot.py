@@ -1211,6 +1211,8 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
     # HOME SPEED SELECTION
     # -----------------------------------------------------
 
+    speed = None
+
     if flow == "install_home_speed":
 
         home_packages = {
@@ -1220,7 +1222,6 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
         }
 
         if raw not in home_packages:
-
             await send_reply(
                 message,
                 "15 Mbps၊ 25 Mbps သို့မဟုတ် 35 Mbps ကို ရွေးချယ်ပါခင်ဗျာ။",
@@ -1251,7 +1252,6 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
         }
 
         if raw not in business_packages:
-
             await send_reply(
                 message,
                 "50 Mbps သို့မဟုတ် 70 Mbps ကို ရွေးချယ်ပါခင်ဗျာ။",
@@ -1269,24 +1269,23 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 
         speed = business_packages[raw]
 
-    else:
-        return
-
     # -----------------------------------------------------
     # PACKAGE PRICE CONFIRMATION
     # -----------------------------------------------------
 
-    kind, speed_text, device_fee, monthly_fee, total = (
-        PACKAGES[speed]
-    )
+    if speed is not None:
 
-    context.user_data["install_package"] = (
-        f"{speed_text} {kind}"
-    )
+        kind, speed_text, device_fee, monthly_fee, total = (
+            PACKAGES[speed]
+        )
 
-    await send_reply(
-        message,
-        f"""✅ Package ရွေးချယ်ပြီးပါပြီ။
+        context.user_data["install_package"] = (
+            f"{speed_text} {kind}"
+        )
+
+        await send_reply(
+            message,
+            f"""✅ Package ရွေးချယ်ပြီးပါပြီ။
 
 📦 {speed_text} {kind}
 
@@ -1297,16 +1296,16 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 ယခု လိုင်းသစ်တပ်ဆင်ရန်
 စာရင်းပေးသွင်းမှုကို ဆက်လက်လုပ်ဆောင်ပါမယ်။
 """,
-        update,
-    )
+            update,
+        )
 
-    await start_installation_flow(
-        message,
-        update,
-        context,
-    )
-    return
-    
+        await start_installation_flow(
+            message,
+            update,
+            context,
+        )
+        return
+
     # -----------------------------------------------------
     # NAME
     # -----------------------------------------------------
