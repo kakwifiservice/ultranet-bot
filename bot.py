@@ -1085,14 +1085,9 @@ async def handle_installation_flow(
             device_count = 0
 
         if device_count < 1:
-
             await send_reply(
                 message,
-                """❌ ဖုန်းအရေအတွက်ကို ဂဏန်းဖြင့်
-မှန်ကန်စွာ ပြန်ပို့ပေးပါခင်ဗျာ။
-
-ဥပမာ — 4 / 8 / 12 / 18 / 25
-""",
+                "❌ ဖုန်းအရေအတွက်ကို ဂဏန်းဖြင့် ပြန်ပို့ပေးပါခင်ဗျာ။",
                 update,
                 ReplyKeyboardMarkup(
                     [["🔙 Main Menu"]],
@@ -1102,52 +1097,36 @@ async def handle_installation_flow(
             return
 
         context.user_data["install_device_count"] = device_count
-
-        if device_count <= 4:
-            recommended = "15"
-        elif device_count <= 8:
-            recommended = "25"
-        elif device_count <= 12:
-            recommended = "35"
-        elif device_count <= 18:
-            recommended = "50"
-        elif device_count <= 25:
-            recommended = "70"
-        else:
-            recommended = "70"
-
-        context.user_data["install_recommended_package"] = recommended
         context.user_data["flow"] = "install_package_type"
-
-        package_names = {
-            "15": "15 Mbps Home",
-            "25": "25 Mbps Home",
-            "35": "35 Mbps Home",
-            "50": "50 Mbps Business",
-            "70": "70 Mbps Business",
-        }
 
         extra_note = ""
 
         if device_count > 25:
             extra_note = """
 
-⚠️ ဖုန်း ၂၅ လုံးထက်ပို၍ အသုံးပြုနိုင်သော်လည်း
-တစ်ချိန်တည်း အသုံးပြုသူများလာပါက
-Internet နှေးခြင်းနှင့် Connection မတည်ငြိမ်ခြင်း
-ဖြစ်နိုင်ပါတယ်။
+⚠️ ဖုန်း ၂၅ လုံးထက်ပို အသုံးပြုပါက
+တစ်ချိန်တည်း အသုံးပြုသူများလာသည့်အခါ
+Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်။
 """
 
         await send_reply(
             message,
             f"""📱 အသုံးပြုမည့်ဖုန်း — {device_count} လုံး
 
-📦 အကြံပြု Package
-{package_names[recommended]}
+📊 အဆင့် ၂ — Package အကြံပြုချက်
 
-အောက်ပါအတိုင်း Package အမျိုးအစားကို
-ရွေးချယ်ပေးပါခင်ဗျာ။
+| Package | ခန့်မှန်းဖုန်းအရေအတွက် |
+|---|---|
+| 15 Mbps Home | 4 လုံးအထိ |
+| 25 Mbps Home | 7–8 လုံး |
+| 35 Mbps Home | 12 လုံးအထိ |
+| 50 Mbps Business | 17–18 လုံး |
+| 70 Mbps Business | 25 လုံးအထိ |
+
 {extra_note}
+
+အောက်ပါခလုတ်များမှ
+အသုံးပြုလိုသည့်အမျိုးအစားကို ရွေးချယ်ပါခင်ဗျာ။
 """,
             update,
             ReplyKeyboardMarkup(
@@ -1160,7 +1139,7 @@ Internet နှေးခြင်းနှင့် Connection မတည်င�
             ),
         )
         return
-        
+
     # -----------------------------------------------------
     # PACKAGE TYPE SELECTION
     # -----------------------------------------------------
@@ -1177,8 +1156,27 @@ Internet နှေးခြင်းနှင့် Connection မတည်င�
                 speed = "15"
             elif device_count <= 8:
                 speed = "25"
-            else:
+            elif device_count <= 12:
                 speed = "35"
+            else:
+                await send_reply(
+                    message,
+                    """❌ Home Package သည်
+ဖုန်း ၁၂ လုံးအထိအတွက် အကြံပြုထားပါတယ်။
+
+ဖုန်းအရေအတွက်အလိုက် Business ကို
+ရွေးချယ်ပေးပါခင်ဗျာ။""",
+                    update,
+                    ReplyKeyboardMarkup(
+                        [
+                            ["🏠 Home"],
+                            ["🏢 Business"],
+                            ["🔙 Main Menu"],
+                        ],
+                        resize_keyboard=True,
+                    ),
+                )
+                return
 
         elif raw == "🏢 Business":
 
@@ -1188,11 +1186,9 @@ Internet နှေးခြင်းနှင့် Connection မတည်င�
                 speed = "70"
 
         else:
-
             await send_reply(
                 message,
-                """အောက်ပါခလုတ်များထဲမှ
-တစ်ခုကို ရွေးချယ်ပေးပါခင်ဗျာ။""",
+                "အောက်ပါခလုတ်များထဲမှ တစ်ခုကို ရွေးချယ်ပါခင်ဗျာ။",
                 update,
                 ReplyKeyboardMarkup(
                     [
@@ -1227,7 +1223,6 @@ Internet နှေးခြင်းနှင့် Connection မတည်င�
 စာရင်းပေးသွင်းမှုကို ဆက်လက်လုပ်ဆောင်ပါမယ်။
 """,
             update,
-            menu(),
         )
 
         await start_installation_flow(
