@@ -4397,6 +4397,19 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 # =========================================================
+# GET TELEGRAM CHAT ID
+# =========================================================
+
+async def chatid_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+
+    if chat and update.effective_message:
+        await update.effective_message.reply_text(
+            f"Chat ID: {chat.id}\n"
+            f"Chat Type: {chat.type}"
+        )
+
+# =========================================================
 # CUSTOMER SUPPORT BUTTON FOR DISCUSSION GROUP
 # =========================================================
 
@@ -4760,6 +4773,13 @@ def main():
         CommandHandler(
             "post",
             post_to_channel,
+        )
+    )
+    
+    app.add_handler(
+        CommandHandler(
+            "chatid",
+            chatid_command,
         )
     )
 
