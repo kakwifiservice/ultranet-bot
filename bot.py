@@ -4873,9 +4873,21 @@ async def handle_reconnection_flow(message, update, context, raw):
 # =========================================================
 
 async def start_ad_scheduler(application):
-    application.create_task(
-        schedule_next_ad(application)
-    )
+    log.info("Starting automatic advertisement scheduler...")
+
+    try:
+        application.create_task(
+            schedule_next_ad(application),
+            name="automatic_ad_scheduler",
+        )
+        log.info("Automatic advertisement scheduler task created.")
+
+    except Exception:
+        log.exception("Failed to start automatic advertisement scheduler.")
+
+# =========================================================
+# MAIN
+# =========================================================
 
 def main():
 
@@ -4891,33 +4903,10 @@ def main():
         .build()
     )
 
-    app.add_handler(
-        CommandHandler(
-            "start",
-            start,
-        )
-    )
-
-    app.add_handler(
-        CommandHandler(
-            "post",
-            post_to_channel,
-        )
-    )
-    
-    app.add_handler(
-        CommandHandler(
-            "chatid",
-            chatid_command,
-        )
-    )
-
-    app.add_handler(
-        CommandHandler(
-            "support",
-            support_command,
-        )
-    )
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("post", post_to_channel))
+    app.add_handler(CommandHandler("chatid", chatid_command))
+    app.add_handler(CommandHandler("support", support_command))
 
     app.add_handler(
         MessageHandler(
@@ -4926,14 +4915,11 @@ def main():
         )
     )
 
-    print(
-        f"{BOT_NAME} Bot is running..."
-    )
+    print(f"{BOT_NAME} Bot is running...")
 
     app.run_polling(
         allowed_updates=Update.ALL_TYPES
     )
-
 
 # =========================================================
 # START
