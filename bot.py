@@ -1351,6 +1351,7 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
         )
         return
 
+    
     # -----------------------------------------------------
     # PHONE
     # -----------------------------------------------------
@@ -1366,7 +1367,8 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
                 """❌ ဖုန်းနံပါတ်ပုံစံ မမှန်သေးပါဘူး။
 
 ဥပမာ —
-09xxxxxxxxx
+09123456789
++959123456789
 
 ပြန်ပို့ပေးပါခင်ဗျာ။
 """,
@@ -1379,11 +1381,67 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
             return
 
         context.user_data["install_phone"] = phone
+        context.user_data["flow"] = "install_phone2"
+
+        await send_reply(
+            message,
+            """✅ ပထမဖုန်းနံပါတ် ရရှိပါပြီ။
+
+📞 အရန်ဖုန်းနံပါတ် (၂) ကိုလည်း
+ထပ်မံပေးပို့ပေးပါခင်ဗျာ။
+
+ပထမဖုန်းနံပါတ်ကို ဆက်သွယ်မရပါက
+ဒီနံပါတ်မှတစ်ဆင့် ဆက်သွယ်နိုင်ရန် ဖြစ်ပါတယ်။
+
+အရန်ဖုန်းနံပါတ် မရှိပါက
+မရှိပါ ဟု ရိုက်ပို့နိုင်ပါတယ်။
+""",
+            update,
+            ReplyKeyboardMarkup(
+                [["🔙 Main Menu"]],
+                resize_keyboard=True,
+            ),
+        )
+        return
+
+    # -----------------------------------------------------
+    # SECOND PHONE
+    # -----------------------------------------------------
+
+    if flow == "install_phone2":
+
+        phone2 = raw.strip().replace(" ", "").replace("-", "")
+
+        if phone2 != "မရှိပါ" and not re.fullmatch(
+            r"(09\d{7,9}|\+959\d{7,9})",
+            phone2,
+        ):
+
+            await send_reply(
+                message,
+                """❌ ဖုန်းနံပါတ်ပုံစံ မမှန်သေးပါဘူး။
+
+ဥပမာ —
+09123456789
++959123456789
+
+အရန်ဖုန်းနံပါတ် မရှိပါက
+မရှိပါ ဟု ရိုက်ပို့နိုင်ပါတယ်။
+""",
+                update,
+                ReplyKeyboardMarkup(
+                    [["🔙 Main Menu"]],
+                    resize_keyboard=True,
+                ),
+            )
+            return
+
+        context.user_data["install_phone2"] = phone2
         context.user_data["flow"] = "install_address"
 
         await send_reply(
             message,
-            """✅ ဖုန်းနံပါတ် ရရှိပါပြီ။
+            """✅ ဖုန်းနံပါတ်များ ရရှိပါပြီ။
 
 အဆင့် (3/5)
 
@@ -1525,7 +1583,6 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
         )
         return
 
-    
     # -----------------------------------------------------
     # CONFIRM
     # -----------------------------------------------------
@@ -1540,8 +1597,11 @@ Internet နှေးခြင်း ဖြစ်နိုင်ပါတယ်�
 👤 အမည်
 {context.user_data.get("install_name", "-")}
 
-📞 ဖုန်းနံပါတ်
+📞 အဓိကဖုန်းနံပါတ် (၁)
 {context.user_data.get("install_phone", "-")}
+
+📞 အရန်ဖုန်းနံပါတ် (၂)
+{context.user_data.get("install_phone2", "မရှိပါ")}
 
 📍 တပ်ဆင်မည့်နေရာ
 {context.user_data.get("install_address", "-")}
