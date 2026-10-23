@@ -6,6 +6,8 @@ Set BOT_TOKEN and ADMIN_CHAT_ID as environment variables. Never paste the token 
 import os
 import re
 import logging
+import asyncio
+from datetime import datetime, timedelta, timezone
 from telegram import (
     Update, ReplyKeyboardMarkup, KeyboardButton,
     InlineKeyboardMarkup, InlineKeyboardButton,
@@ -4397,6 +4399,123 @@ async def post_to_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 # =========================================================
+# AUTOMATIC AD POSTING
+# =========================================================
+
+MYANMAR_TZ = timezone(timedelta(hours=6, minutes=30))
+
+AD_TARGETS = [
+    "@ultranetkak",
+    -1004294645243,
+]
+
+AD_MESSAGES = [
+    """🌐 Ultra Net KAK WiFi Internet Service Provider
+
+🏠 အိမ်သုံးနှင့် 🏢 လုပ်ငန်းသုံး Internet Package များ ရရှိနိုင်ပါပြီ။
+
+📞 Customer Support: 09-777719577
+💬 Telegram: @UltraNetKAKWiFi
+
+📢 Channel: https://t.me/ultranetkak
+""",
+    """📶 Internet မြန်နှုန်းကောင်းကောင်းနဲ့ ချိတ်ဆက်လိုပါသလား?
+
+Ultra Net KAK မှ အိမ်သုံးနှင့် လုပ်ငန်းသုံး WiFi ဝန်ဆောင်မှုများ ပေးနေပါပြီ။
+
+📞 09-777719577
+💬 @UltraNetKAKWiFi
+""",
+]
+
+AD_INDEX = 0
+
+# =========================================================
+# AUTOMATIC AD POSTING
+# =========================================================
+
+async def automatic_ad_job(application):
+    global AD_INDEX
+
+    if not AD_MESSAGES:
+        log.error("AD_MESSAGES is empty.")
+        return
+
+    post_text = AD_MESSAGES[AD_INDEX % len(AD_MESSAGES)]
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(
+            "💬 သိလိုသမျှ မေးရန်",
+            url="https://t.me/UltraNetKAKMM_bot",
+        )]
+    ])
+
+    success = False
+
+    for target in AD_TARGETS:
+        try:
+            await application.bot.send_message(
+                chat_id=target,
+                text=post_text,
+                reply_markup=keyboard,
+            )
+
+            log.info(
+                "Automatic advertisement sent to %s",
+                target,
+            )
+            success = True
+
+        except Exception:
+            log.exception(
+                "Automatic advertisement failed for %s",
+                target,
+            )
+
+    if success:
+        AD_INDEX = (AD_INDEX + 1) % len(AD_MESSAGES)
+
+
+async def schedule_next_ad(application):
+
+    while True:
+        now = datetime.now(MYANMAR_TZ)
+
+        today_9 = now.replace(
+            hour=9,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+
+        today_17 = now.replace(
+            hour=17,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+
+        if now < today_9:
+            next_run = today_9
+
+        elif now < today_17:
+            next_run = today_17
+
+        else:
+            next_run = today_9 + timedelta(days=1)
+
+        delay = (next_run - now).total_seconds()
+
+        log.info(
+            "Next automatic advertisement: %s Myanmar time",
+            next_run.strftime("%Y-%m-%d %H:%M:%S"),
+        )
+
+        await asyncio.sleep(delay)
+
+        await automatic_ad_job(application)
+
+# =========================================================
 # GET TELEGRAM CHAT ID
 # =========================================================
 
@@ -4753,6 +4872,11 @@ async def handle_reconnection_flow(message, update, context, raw):
 # RUN BOT
 # =========================================================
 
+async def start_ad_scheduler(application):
+    application.create_task(
+        schedule_next_ad(application)
+    )
+
 def main():
 
     if not TOKEN:
@@ -4760,7 +4884,12 @@ def main():
             "BOT_TOKEN environment variable မရှိသေးပါ။"
         )
 
-    app = Application.builder().token(TOKEN).build()
+    app = (
+        Application.builder()
+        .token(TOKEN)
+        .post_init(start_ad_scheduler)
+        .build()
+    )
 
     app.add_handler(
         CommandHandler(
