@@ -1018,8 +1018,11 @@ def installation_summary(context, customer=True):
 👤 အမည်
 {context.user_data.get("install_name", "-")}
 
-📞 ဖုန်းနံပါတ်
+📞 အဓိကဖုန်းနံပါတ် (၁)
 {context.user_data.get("install_phone", "-")}
+
+📞 အရန်ဖုန်းနံပါတ် (၂)
+{context.user_data.get("install_phone2", "မရှိပါ")}
 
 📍 တပ်ဆင်မည့်နေရာ
 {context.user_data.get("install_address", "-")}
