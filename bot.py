@@ -4058,13 +4058,18 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # =====================================================
-    # PAYMENT
+    # PAYMENT / BILL
     # =====================================================
 
-    if raw == "💰 Payment" or any(
+    if raw.strip() in [
+        "💰 Payment",
+        "🧾 Bill (ဘေလ်) ပေးဆောင်ခြင်း",
+    ] or any(
         x in text
         for x in [
             "payment",
+            "bill",
+            "ဘေလ်",
             "kpay",
             "wavepay",
             "wavemoney",
