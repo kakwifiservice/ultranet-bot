@@ -3890,31 +3890,34 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     
-    # =====================================================
-    # INTERNET RELOCATION BUTTON
-    # =====================================================
+# =====================================================
+# INTERNET RELOCATION BUTTON
+# =====================================================
 
-    if raw == "🔄 Internet လိုင်းရွှေ့ရန်":
+if raw.strip() in (
+    "📍 WiFi နေရာပြောင်း",
+    "🔄 Internet လိုင်းရွှေ့ရန်",
+):
 
-        await start_relocation_flow(
-            message,
-            update,
-            context,
-        )
-        return
-    
-    # =====================================================
-    # WIFI RECONNECTION BUTTON
-    # =====================================================
+    await start_relocation_flow(
+        message,
+        update,
+        context,
+    )
+    return
 
-    if raw == "♻️ WiFi ပြန်လည်အသုံးပြုရန်":
+# =====================================================
+# WIFI RECONNECTION BUTTON
+# =====================================================
 
-        await start_reconnection_flow(
-            message,
-            update,
-            context,
-        )
-        return
+if raw == "♻️ WiFi ပြန်လည်အသုံးပြုရန်":
+
+    await start_reconnection_flow(
+        message,
+        update,
+        context,
+    )
+    return
 
     # =====================================================
     # NEW INSTALLATION BUTTON
